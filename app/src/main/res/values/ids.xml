@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="centerRadioBtn" type="id">1</item>
+    <item name="centerCropRadioBtn" type="id">2</item>
+    <item name="fitCenterRadioBtn" type="id">3</item>
+    <item name="fitEndRadioBtn" type="id">4</item>
+    <item name="fitXYRadioBtn" type="id">5</item>
+    <item name="matrixRadioBtn" type="id">6</item>
+</resources>
