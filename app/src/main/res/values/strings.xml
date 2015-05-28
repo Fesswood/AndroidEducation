@@ -2,4 +2,9 @@
     <string name="app_name">AndroidEducation</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="text_to_first_screen">На первый экран</string>
+    <string name="text_to_second_screen">На второй экран</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
