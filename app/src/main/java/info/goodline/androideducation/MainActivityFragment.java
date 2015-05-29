@@ -19,7 +19,7 @@ public class MainActivityFragment extends Fragment implements Button.OnClickList
     Button toFirstScreenBtn;
     Button toSecondScreenBtn;
     FrameLayout fragmentFrame;
-    private FragmentTransaction ft;
+
 
     public MainActivityFragment() {
     }
@@ -42,15 +42,13 @@ public class MainActivityFragment extends Fragment implements Button.OnClickList
 
     @Override
     public void onClick(View v) {
-        ft = getActivity().getFragmentManager().beginTransaction();
+        FragmentTransaction ft = getActivity().getFragmentManager().beginTransaction();
         ft.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right);
         switch (v.getId()){
             case  R.id.FirstScreenBtn:
-
                 ft.replace(R.id.fragment_frame,  FisrtScreenFragment.newInstance("Jack","wut?"));
                 break;
             case  R.id.SecondScreenBtn:
-
                 ft.replace(R.id.fragment_frame, SecondScreenFragment.newInstance("Yuup", "We need go deeper!"));
                 break;
         }

@@ -12,7 +12,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 
-public class FisrtScreenFragment extends Fragment implements View.OnClickListener {
+public class FisrtScreenFragment extends Fragment implements  RadioGroup.OnCheckedChangeListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -24,8 +24,8 @@ public class FisrtScreenFragment extends Fragment implements View.OnClickListene
     private RadioButton centerRadioButton;
     private RadioButton centerCropRadioButton;
     private RadioButton fitCenterRadioButton;
-    private RadioButton fitEndRadioButton   ;
-    private RadioButton fitXYRadioButton    ;
+    private RadioButton fitEndRadioButton;
+    private RadioButton fitXYRadioButton;
     private RadioButton matrixRadioButton;
     private RadioGroup radioGroup;
     private ImageView imageView;
@@ -67,10 +67,10 @@ public class FisrtScreenFragment extends Fragment implements View.OnClickListene
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        LinearLayout inflateView =(LinearLayout) inflater.inflate(R.layout.fragment_fisrt_screen, container, false);
-        imageView= (ImageView) inflateView.findViewById(R.id.imageViewFirst);
-        textView= (TextView) inflateView.findViewById(R.id.textView);
-        textView.setText(mParam1+" "+mParam2);
+        LinearLayout inflateView = (LinearLayout) inflater.inflate(R.layout.fragment_fisrt_screen, container, false);
+        imageView = (ImageView) inflateView.findViewById(R.id.imageViewFirst);
+        textView = (TextView) inflateView.findViewById(R.id.textView);
+        textView.setText(mParam1 + " " + mParam2);
         radioGroup = new RadioGroup(getActivity());
         radioGroup.setOrientation(RadioGroup.VERTICAL);
 
@@ -88,30 +88,24 @@ public class FisrtScreenFragment extends Fragment implements View.OnClickListene
     }
 
     private void initializeBtn() {
-        centerRadioButton     = new RadioButton(getActivity());
+        centerRadioButton = new RadioButton(getActivity());
         centerCropRadioButton = new RadioButton(getActivity());
-        fitCenterRadioButton  = new RadioButton(getActivity());
-        fitEndRadioButton     = new RadioButton(getActivity());
-        fitXYRadioButton      = new RadioButton(getActivity());
-        matrixRadioButton     = new RadioButton(getActivity());
+        fitCenterRadioButton = new RadioButton(getActivity());
+        fitEndRadioButton = new RadioButton(getActivity());
+        fitXYRadioButton = new RadioButton(getActivity());
+        matrixRadioButton = new RadioButton(getActivity());
 
-        centerRadioButton.setText(" center");
-        centerCropRadioButton.setText(" centerCrop");
-        fitCenterRadioButton.setText(" fitCenter");
-        fitEndRadioButton.setText(" fitEnd");
-        fitXYRadioButton.setText(" fitXY");
-        matrixRadioButton.setText(" matrix");
+        centerRadioButton.setText(R.string.center);
+        centerCropRadioButton.setText(R.string.centerCrop);
+        fitCenterRadioButton.setText(R.string.fitCenter);
+        fitEndRadioButton.setText(R.string.fitEnd);
+        fitXYRadioButton.setText(R.string.fitXY);
+        matrixRadioButton.setText(R.string.matrix);
     }
 
 
-
     private void setListener() {
-        centerRadioButton.setOnClickListener(this);
-        centerCropRadioButton.setOnClickListener(this);
-        fitCenterRadioButton.setOnClickListener(this);
-        fitEndRadioButton.setOnClickListener(this);
-        fitXYRadioButton.setOnClickListener(this);
-        matrixRadioButton.setOnClickListener(this);
+        radioGroup.setOnCheckedChangeListener(this);
     }
 
     private void addToRadiogroup() {
@@ -134,6 +128,7 @@ public class FisrtScreenFragment extends Fragment implements View.OnClickListene
                 matrixRadioButton
         );
     }
+
     private void setids() {
         centerRadioButton.setId(R.id.centerRadioBtn);
         centerCropRadioButton.setId(R.id.centerCropRadioBtn);
@@ -142,17 +137,28 @@ public class FisrtScreenFragment extends Fragment implements View.OnClickListene
         fitXYRadioButton.setId(R.id.fitXYRadioBtn);
         matrixRadioButton.setId(R.id.matrixRadioBtn);
     }
-    @Override
-    public void onClick(View v) {
-        boolean checked = ((RadioButton) v).isChecked();
-        switch (v.getId()) {
-            case R.id.centerRadioBtn:     if (checked) imageView.setScaleType(ImageView.ScaleType.CENTER); break;
-            case R.id.centerCropRadioBtn: if (checked) imageView.setScaleType(ImageView.ScaleType.CENTER_CROP); break;
-            case R.id.fitCenterRadioBtn:  if (checked) imageView.setScaleType(ImageView.ScaleType.FIT_CENTER); break;
-            case R.id.fitEndRadioBtn:     if (checked) imageView.setScaleType(ImageView.ScaleType.FIT_END); break;
-            case R.id.fitXYRadioBtn:      if (checked) imageView.setScaleType(ImageView.ScaleType.FIT_XY); break;
-            case R.id.matrixRadioBtn: if (checked)     imageView.setScaleType(ImageView.ScaleType.MATRIX); break;
-        }
 
+    @Override
+    public void onCheckedChanged(RadioGroup group, int checkedId) {
+        switch (checkedId) {
+            case R.id.centerRadioBtn:
+                imageView.setScaleType(ImageView.ScaleType.CENTER);
+                break;
+            case R.id.centerCropRadioBtn:
+                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                break;
+            case R.id.fitCenterRadioBtn:
+                imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                break;
+            case R.id.fitEndRadioBtn:
+                imageView.setScaleType(ImageView.ScaleType.FIT_END);
+                break;
+            case R.id.fitXYRadioBtn:
+                imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+                break;
+            case R.id.matrixRadioBtn:
+                imageView.setScaleType(ImageView.ScaleType.MATRIX);
+                break;
+        }
     }
 }

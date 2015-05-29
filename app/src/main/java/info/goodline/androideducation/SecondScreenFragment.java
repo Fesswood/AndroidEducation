@@ -27,7 +27,7 @@ public class SecondScreenFragment extends Fragment     implements AdapterView.On
     private Spinner mSpinner;
     private TextView mTitleTextView;
     private ImageView imageView;
-
+    private String[] mScyleTypes;
 
 
     public static SecondScreenFragment newInstance(String param1, String param2) {
@@ -65,7 +65,7 @@ public class SecondScreenFragment extends Fragment     implements AdapterView.On
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
         layoutParams.setMargins(30, 20, 30, 0);
-
+        mScyleTypes=getResources().getStringArray( R.array.scale_type_array);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.scale_type_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -78,20 +78,24 @@ public class SecondScreenFragment extends Fragment     implements AdapterView.On
         return inflateView;
     }
 
-
+    /**
+     *   Change Scale type of imageView switch based on array in /res/values/ScaleType.xml
+     * @param parent
+     * @param view
+     * @param pos  position in ScaleType array
+     * @param id
+     */
         public void onItemSelected(AdapterView<?> parent, View view,
         int pos, long id) {
-            // An item was selected. You can retrieve the selected item using
-            String item=(String)parent.getItemAtPosition(pos);
-            switch (item){
-                case "Center":        imageView.setScaleType(ImageView.ScaleType.CENTER); break;
-                case "Center crop":   imageView.setScaleType(ImageView.ScaleType.CENTER_CROP); break;
-                case "Center inside": imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE); break;
-                case "Fit center":    imageView.setScaleType(ImageView.ScaleType.FIT_CENTER); break;
-                case "Fit start":     imageView.setScaleType(ImageView.ScaleType.FIT_START); break;
-                case "Fit end":       imageView.setScaleType(ImageView.ScaleType.FIT_END); break;
-                case "Fit XY":        imageView.setScaleType(ImageView.ScaleType.FIT_XY); break;
-                case "matrix":        imageView.setScaleType(ImageView.ScaleType.MATRIX); break;
+            switch (pos){
+                case  0:        imageView.setScaleType(ImageView.ScaleType.CENTER); break;
+                case  1:   imageView.setScaleType(ImageView.ScaleType.CENTER_CROP); break;
+                case  2: imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE); break;
+                case  3:    imageView.setScaleType(ImageView.ScaleType.FIT_CENTER); break;
+                case  4:     imageView.setScaleType(ImageView.ScaleType.FIT_START); break;
+                case  5:       imageView.setScaleType(ImageView.ScaleType.FIT_END); break;
+                case  6:        imageView.setScaleType(ImageView.ScaleType.FIT_XY); break;
+                case  7:        imageView.setScaleType(ImageView.ScaleType.MATRIX); break;
             }
         }
 
