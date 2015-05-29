@@ -151,7 +151,7 @@ public class FisrtScreenFragment extends Fragment implements View.OnClickListene
             case R.id.fitCenterRadioBtn:  if (checked) imageView.setScaleType(ImageView.ScaleType.FIT_CENTER); break;
             case R.id.fitEndRadioBtn:     if (checked) imageView.setScaleType(ImageView.ScaleType.FIT_END); break;
             case R.id.fitXYRadioBtn:      if (checked) imageView.setScaleType(ImageView.ScaleType.FIT_XY); break;
-            case R.id.matrixRadioBtn: if (checked) imageView.setScaleType(ImageView.ScaleType.MATRIX); break;
+            case R.id.matrixRadioBtn: if (checked)     imageView.setScaleType(ImageView.ScaleType.MATRIX); break;
         }
 
     }
