@@ -1,6 +1,8 @@
 package info.goodline.imageswapper.activity;
 
 import android.app.Activity;
+import android.os.Bundle;
+import android.widget.ImageView;
 
 import java.util.ArrayList;
 
@@ -9,5 +11,17 @@ import java.util.ArrayList;
  */
 public class BaseActivity extends Activity {
 
-    public ArrayList<BaseBehavior> fragmentActions;
+    protected ArrayList<BaseBehavior> fragmentActions;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        fragmentActions=new ArrayList<>();
+    }
+
+    public void sendScaleTypeToAll(ImageView.ScaleType scaleType){
+        for (BaseBehavior behavior: fragmentActions){
+            behavior.changeScaleType(scaleType);
+        }
+    }
 }

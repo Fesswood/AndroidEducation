@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="fragment_1" type="id">1</item>
+    <item name="fragment_2" type="id">2</item>
+    <item name="fragment_3" type="id">3</item>
+    <item name="fragment_4" type="id">4</item>
+    <item name="fragment_5" type="id">5</item>
+    <item name="fragment_6" type="id">6</item>
+</resources>

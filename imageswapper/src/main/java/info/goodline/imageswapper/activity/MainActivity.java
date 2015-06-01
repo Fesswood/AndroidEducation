@@ -12,6 +12,8 @@ import info.goodline.imageswapper.R;
 public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     static final int ACTION_LIST_REQUEST = 0;
+    static final String STRING_RESULT_TAG = "MainActivity.ResultString";
+
     Button toFragmentScreenButton;
     TextView mLogTextView;
     @Override
@@ -35,7 +37,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == ACTION_LIST_REQUEST) {
             if (resultCode == RESULT_OK) {
-                    String receivedData=data.getDataString();
+                    String receivedData=data.getStringExtra(STRING_RESULT_TAG);
                     mLogTextView.setText(receivedData);
             }
         }
