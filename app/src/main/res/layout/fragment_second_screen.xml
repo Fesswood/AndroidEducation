@@ -20,8 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/imageViewSecond"
-        android:layout_gravity="center"
         android:src="@drawable/image2"
-     />
+        android:layout_gravity="center" />
 
 </LinearLayout>
