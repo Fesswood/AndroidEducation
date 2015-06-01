@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">ImageSwapper</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="empty_text">Для отображение логов перейдите на экран 2</string>
+    <string name="fragment_screen_btn_string">СТАРТ</string>
+    <string name="title_activity_fragemt_swapper">FragemtSwapperActivity</string>
+</resources>
