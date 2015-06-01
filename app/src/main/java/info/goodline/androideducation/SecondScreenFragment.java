@@ -16,7 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-public class SecondScreenFragment extends Fragment     implements AdapterView.OnItemSelectedListener {
+public class SecondScreenFragment extends Fragment implements AdapterView.OnItemSelectedListener {
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
