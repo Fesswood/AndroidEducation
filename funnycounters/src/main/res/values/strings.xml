@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">FunnyCounters</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="clear_fragments_btn_string">Очистить</string>
+    <string name="clear_counters_btn_string">Обнулить</string>
+    <string name="title_activity_choose_fragment">ChooseFragmentActivity</string>
+    <string name="fragment_1">Фрагмент бегущий</string>
+    <string name="fragment_2">Фрагмент вращающийся</string>
+    <string name="fragment_3">Фрагмент Прыгающий</string>
+    <string name="fragment_4">Фрагмент Миграющий</string>
+    <string name="fragment_5">Фрагмент пустой</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="counter_string">счетчик фрагмента</string>
+    <string name="title_activity_base">BaseActivity</string>
+</resources>
