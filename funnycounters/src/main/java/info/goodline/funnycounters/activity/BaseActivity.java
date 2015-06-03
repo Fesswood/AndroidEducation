@@ -23,6 +23,8 @@ public class BaseActivity extends Activity {
    public interface CounterListener {
        void clearCounter();
        void deleteCounter();
+       int getCounter();
+       void setCounter(int newValue);
    }
 
 }

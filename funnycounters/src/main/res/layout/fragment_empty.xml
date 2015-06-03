@@ -1,13 +1,43 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
+             android:gravity="center"
+             android:orientation="vertical"
              tools:context="info.goodline.funnycounters.fragment.EmptyFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment"/>
+        android:id="@+id/counter_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:textColor="@android:color/primary_text_dark"
+        android:textSize="25dp"
+        android:text="@string/counter_string"/>
 
-</FrameLayout>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/press_me_string_textview"
+        android:id="@+id/press_textView"
+        android:layout_gravity="center_horizontal"/>
+
+    <LinearLayout
+        android:id="@+id/invisible_frame_layout"
+        android:visibility="invisible"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/iam_invis_string"
+
+            style="@style/TextAppearance.AppCompat.Medium"
+            android:layout_gravity="center"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>

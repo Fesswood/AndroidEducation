@@ -2,6 +2,7 @@ package info.goodline.funnycounters.fragment;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 import java.util.Timer;
@@ -12,16 +13,27 @@ import info.goodline.funnycounters.activity.BaseActivity;
 /**
  * Created by sergeyb on 02.06.15.
  */
-public class BaseFragment extends Fragment implements BaseActivity.CounterListener {
+public abstract class BaseFragment extends Fragment implements BaseActivity.CounterListener {
 
+    private static final String TIMER_STATE = "BaseFragment.TIMER_STATE";
     private Timer mFragmentTimer;
-    private volatile int mCounterValue;
+    protected volatile int mCounterValue;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mFragmentTimer=new Timer();
         mCounterValue=0;
+    }
+
+
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mFragmentTimer.cancel();
+        mFragmentTimer.purge();
+        mFragmentTimer=null;
     }
 
     public void setupTimer(final TextView counterTextView){
@@ -31,8 +43,9 @@ public class BaseFragment extends Fragment implements BaseActivity.CounterListen
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        counterTextView.setText("" + mCounterValue);
-                        mCounterValue++;
+                        if(counterTextView!= null){
+                            countTimer(counterTextView);
+                        }
                     }
                 });
             }
@@ -44,9 +57,19 @@ public class BaseFragment extends Fragment implements BaseActivity.CounterListen
     }
 
     @Override
+    public int getCounter() {
+        return mCounterValue;
+    }
+    @Override
+    public void setCounter(int newValue) {
+        mCounterValue=newValue;
+    }
+
+    @Override
     public void deleteCounter() {
         mFragmentTimer.cancel();
         mFragmentTimer.purge();
         mFragmentTimer=null;
     }
+    public abstract void countTimer(TextView counterTextView);
 }

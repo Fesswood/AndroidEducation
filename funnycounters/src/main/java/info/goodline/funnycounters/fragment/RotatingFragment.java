@@ -5,78 +5,66 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.os.CountDownTimer;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
+import android.view.animation.TranslateAnimation;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import info.goodline.funnycounters.R;
 import info.goodline.funnycounters.activity.BaseActivity;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- *
- * to handle interaction events.
- * Use the {@link RotatingFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class RotatingFragment extends BaseFragment{
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     private TextView mCounterTextView;
-    private volatile int mCounterValue;
+    private ImageView mCatView;
+    private GridLayout mGridLayout;
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @return A new instance of fragment RotatingFragment.
-     */
-    // TODO: Rename and change types and number of parameters
     public static RotatingFragment newInstance() {
         RotatingFragment fragment = new RotatingFragment();
-       /* Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);*/
+
         return fragment;
     }
 
     public RotatingFragment() {
-        // Required empty public constructor
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-       /* if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }*/
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View inflateView = inflater.inflate(R.layout.fragment_rotating, container, false);
-        ImageView catView = (ImageView) inflateView.findViewById(R.id.rotate_image_view);
+
+        GridLayout.LayoutParams param = new GridLayout.LayoutParams();
+        param.height = 60;
+        param.width = 60;
+        param.rightMargin = 5;
+        param.topMargin = 5;
+        param.setGravity(Gravity.CENTER);
+        param.columnSpec = GridLayout.spec(0);
+        param.rowSpec = GridLayout.spec(0);
+
+
+        mCatView = (ImageView) inflateView.findViewById(R.id.rotate_image_view);
+        mCatView.setLayoutParams(param);
         mCounterTextView = (TextView) inflateView.findViewById(R.id.counter_text_view);
-        setupAnimation(catView);
+        mGridLayout = (GridLayout) inflateView.findViewById(R.id.grid_layout);
+        setupAnimation(mCatView);
         setupTimer(mCounterTextView);
         return inflateView;
     }
@@ -91,15 +79,45 @@ public class RotatingFragment extends BaseFragment{
 
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void countTimer(TextView counterTextView) {
+        counterTextView.setText(String.valueOf(mCounterValue));
+        changeGridCell();
+        mCounterValue++;
     }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
+    private void changeGridCell() {
+        mGridLayout.removeViewInLayout(mCatView);
+        GridLayout.LayoutParams param = new GridLayout.LayoutParams();
+        param.height = 60;
+        param.width = 60;
+        param.rightMargin = 5;
+        param.topMargin = 5;
+        param.setGravity(Gravity.CENTER);
+        toGridСell(param);
+        mGridLayout.addView(mCatView,param);
     }
 
+    public void toGridСell(GridLayout.LayoutParams param){
+        int index = mCounterValue%4;
+        switch (index){
+            case 0:
+                param.columnSpec = GridLayout.spec(0);
+                param.rowSpec = GridLayout.spec(0);
+                break;
+            case 1:
+                param.columnSpec = GridLayout.spec(1);
+                param.rowSpec = GridLayout.spec(0);
+                break;
+            case 2:
+                param.columnSpec = GridLayout.spec(1);
+                param.rowSpec = GridLayout.spec(1);
+                break;
+            case 3:
+                param.columnSpec = GridLayout.spec(0);
+                param.rowSpec = GridLayout.spec(1);
+                break;
+        }
 
+    }
 
 }

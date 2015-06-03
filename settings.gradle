@@ -1,1 +1,1 @@
-include ':app', ':imageswapper'
+include ':app', ':imageswapper', ':funnycounters'
