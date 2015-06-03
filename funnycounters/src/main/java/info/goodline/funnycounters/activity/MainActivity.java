@@ -27,7 +27,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public static final int FRAGMENT_TYPE_REQUEST = 0;
     public static final String FRAGMENT_ID_TAG = "MainActivity.FRAGMENT_ID_TAG";
     private static final String FRAME_TO_FRAGMENT_ARRAY_KEY_STATE = "MainActivity.FRAME_TO_FRAGMENT_ARRAY_KEY_STATE";
-    private static final String COUNTERS_VALUES = "MainActivity.FRAME_TO_FRAGMENT_ARRAY_KEY_STATE";
+    private static final String COUNTERS_VALUES = "MainActivity.COUNTERS_VALUES";
     Button mClearFragmentsButton;
     Button mClearCountersButton;
     ArrayList<FrameLayout> mFrameLayoutsList;

@@ -17,13 +17,12 @@ public abstract class BaseFragment extends Fragment implements BaseActivity.Coun
 
     private static final String TIMER_STATE = "BaseFragment.TIMER_STATE";
     private Timer mFragmentTimer;
-    protected volatile int mCounterValue;
+    protected volatile int mCounterValue=0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mFragmentTimer=new Timer();
-        mCounterValue=0;
     }
 
 
