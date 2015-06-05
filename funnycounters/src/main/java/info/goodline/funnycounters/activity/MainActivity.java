@@ -19,10 +19,9 @@ import info.goodline.funnycounters.fragment.EmptyFragment;
 import info.goodline.funnycounters.fragment.JumpingFragment;
 import info.goodline.funnycounters.fragment.RotatingFragment;
 import info.goodline.funnycounters.fragment.RunningFragment;
-import info.goodline.funnycounters.util.SerializableSparseArray;
 
 
-public class MainActivity extends BaseActivity implements View.OnClickListener {
+public class MainActivity extends BaseActivity implements View.OnClickListener, BaseFragment.RegistratorListener  {
 
     public static final int FRAGMENT_TYPE_REQUEST = 0;
     public static final String FRAGMENT_ID_TAG = "MainActivity.FRAGMENT_ID_TAG";
@@ -53,7 +52,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         findAllFrames(column1);
         findAllFrames(column2);
 
-        restoreFragmentsState(savedInstanceState);
+       // restoreFragmentsState(savedInstanceState);
         addClickListener();
     }
 
@@ -66,7 +65,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 mSelectedFrame = entry.getKey();
                 // get the object by the key.
                 fragmentNumber = entry.getValue();
-                attachCurrentFragment(fragmentNumber);
+                //attachCurrentFragment(fragmentNumber);
             }
             for(int i = 0; i < mListeners.size(); i++) {
                  mListeners.get(i).setCounter(countersValues[i]);
@@ -96,6 +95,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 break;
             case R.id.clear_fragments_button:
                 removeAllFragments();
+                break;
             default:
                 startActivityForResult(
                     new Intent(this,ChooseFragmentActivity.class),
@@ -132,12 +132,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(FRAME_TO_FRAGMENT_ARRAY_KEY_STATE, mFrameToFragmentMap);
+      /*  outState.putSerializable(FRAME_TO_FRAGMENT_ARRAY_KEY_STATE, mFrameToFragmentMap);
         int[] counter = new int[mListeners.size()];
         for(int i=0;i<mListeners.size();i++){
             counter[i]=mListeners.get(i).getCounter();
         }
-        outState.putIntArray(COUNTERS_VALUES, counter);
+        outState.putIntArray(COUNTERS_VALUES, counter);*/
     }
 
     private void attachCurrentFragment(int selectedFragmentNumber) {
@@ -145,7 +145,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         getFragmentManager().beginTransaction()
                 .replace(mSelectedFrame, selectedFragment)
                 .commit();
-        this.mListeners.add((CounterListener) selectedFragment);
     }
 
     private Fragment getSelectedFragment(int receivedData) {
@@ -172,6 +171,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 break;
         }
         return fragment;
+    }
+    @Override
+    public void registerListener(BaseActivity.CounterListener counterListener) {
+        registerCounterListener(counterListener);
+    }
+
+    @Override
+    public void unregisterListener(CounterListener counterListener) {
+        unRegisterCounterListener(counterListener);
     }
 
 }

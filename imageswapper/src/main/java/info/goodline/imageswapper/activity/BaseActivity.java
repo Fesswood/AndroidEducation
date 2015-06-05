@@ -13,6 +13,18 @@ public class BaseActivity extends Activity {
 
     protected ArrayList<BaseBehavior> fragmentActions;
 
+
+    public void registerBaseBehaviorListener(BaseBehavior baseFragmentBehavior){
+        fragmentActions.add(baseFragmentBehavior);
+    }
+    public BaseBehavior getBaseBehaviorListener(int fragmentNumber){
+        return fragmentActions.get(fragmentNumber);
+    }
+    public void deleteAllListener(){
+        fragmentActions.clear();
+        fragmentActions=null;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

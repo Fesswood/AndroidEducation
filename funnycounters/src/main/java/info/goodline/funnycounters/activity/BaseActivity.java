@@ -5,6 +5,8 @@ import android.os.Bundle;
 
 import java.util.ArrayList;
 
+import info.goodline.funnycounters.fragment.BaseFragment;
+
 public class BaseActivity extends Activity {
 
     protected ArrayList<CounterListener> mListeners;
@@ -19,8 +21,14 @@ public class BaseActivity extends Activity {
             counterListener.clearCounter();
         }
     }
+    public void registerCounterListener(CounterListener counterListener){
+        mListeners.add(counterListener);
+    }
+    public void unRegisterCounterListener(CounterListener counterListener){
+        mListeners.remove(counterListener);
+    }
 
-   public interface CounterListener {
+    public interface CounterListener {
        void clearCounter();
        void deleteCounter();
        int getCounter();

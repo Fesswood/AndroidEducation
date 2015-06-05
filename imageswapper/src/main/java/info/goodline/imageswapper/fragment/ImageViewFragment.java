@@ -13,35 +13,18 @@ import android.widget.LinearLayout;
 import info.goodline.imageswapper.R;
 import info.goodline.imageswapper.activity.BaseBehavior;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ImageViewFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link ImageViewFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class ImageViewFragment extends Fragment implements BaseBehavior, View.OnClickListener {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+
     private static final String IMAGE_ID = "param1";
     private static final String FRAGMENT_NUMBER = "param2";
 
-    // TODO: Rename and change types of parameters
     private int imageID;
     private int fragmentNumber;
     private OnFragmentInteractionListener mListener;
     private ImageView mImageView;
-    private LinearLayout mlinearLayout;
+    private LinearLayout mLinearLayout;
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param imageId  id of image resource.
-     * @return A new instance of fragment ImageViewFragment.
-     */
-    // TODO: Rename and change types and number of parameters
     public static ImageViewFragment newInstance(int imageId ,int fragmentNumber) {
         ImageViewFragment fragment = new ImageViewFragment();
         Bundle args = new Bundle();
@@ -52,7 +35,6 @@ public class ImageViewFragment extends Fragment implements BaseBehavior, View.On
     }
 
     public ImageViewFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -67,27 +49,34 @@ public class ImageViewFragment extends Fragment implements BaseBehavior, View.On
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mlinearLayout = new LinearLayout(getActivity());
-        mlinearLayout.setLayoutParams(new LinearLayout.LayoutParams(
+        mLinearLayout = new LinearLayout(getActivity());
+        mLinearLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT));
-        mlinearLayout.setPadding(10, 10, 10, 10);
+        mLinearLayout.setPadding(10, 10, 10, 10);
         mImageView = new ImageView(getActivity());
-        mImageView.setImageResource(getIdentFromInt(imageID));
+        mImageView.setImageResource(getIdFromInt(imageID));
         mImageView.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT));
         mImageView.setOnClickListener(this);
-        mlinearLayout.setOnClickListener(this);
-        mlinearLayout.addView(mImageView);
-        return mlinearLayout;
+        mLinearLayout.setOnClickListener(this);
+        mLinearLayout.addView(mImageView);
+        return mLinearLayout;
     }
 
-    private int getIdentFromInt(int imageID) {
-        return getResources().getIdentifier("img_"+imageID,"drawable", getActivity().getPackageName());
+    private int getIdFromInt(int imageID) {
+        switch (imageID){
+            case 1: return R.drawable.img_1;
+            case 2: return R.drawable.img_2;
+            case 3: return R.drawable.img_3;
+            case 4: return R.drawable.img_4;
+            case 5: return R.drawable.img_5;
+            default: return R.drawable.img_6;
+        }
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
+
     public void onFragmentSelected(int fragmentNumber) {
         if (mListener != null) {
             mListener.onFragmentInteraction(fragmentNumber);
@@ -97,9 +86,9 @@ public class ImageViewFragment extends Fragment implements BaseBehavior, View.On
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        try {
+        if( activity instanceof  OnFragmentInteractionListener){
             mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
+        }else {
             throw new ClassCastException(activity.toString()
                     + " must implement OnFragmentInteractionListener");
         }
@@ -129,7 +118,7 @@ public class ImageViewFragment extends Fragment implements BaseBehavior, View.On
     @Override
     public void setImageId(int imageId) {
         imageID=imageId;
-        mImageView.setImageResource(getIdentFromInt(imageId));
+        mImageView.setImageResource(getIdFromInt(imageId));
     }
 
     @Override
@@ -137,7 +126,7 @@ public class ImageViewFragment extends Fragment implements BaseBehavior, View.On
         GradientDrawable gd = new GradientDrawable();
         gd.setColor(getResources().getColor(R.color.white));
         gd.setAlpha(0);
-        mlinearLayout.setBackgroundDrawable(gd);
+        mLinearLayout.setBackgroundDrawable(gd);
     }
 
     @Override
@@ -145,23 +134,13 @@ public class ImageViewFragment extends Fragment implements BaseBehavior, View.On
         GradientDrawable gd = new GradientDrawable();
 
         gd.setStroke(50, 0xFF00FF00);
-        mlinearLayout.setBackgroundDrawable(gd);
+        mLinearLayout.setBackgroundDrawable(gd);
         onFragmentSelected(fragmentNumber);
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
+
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(int numberOfFragment);
+         void onFragmentInteraction(int numberOfFragment);
     }
 
 }

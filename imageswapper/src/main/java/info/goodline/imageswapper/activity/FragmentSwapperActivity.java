@@ -2,25 +2,14 @@ package info.goodline.imageswapper.activity;
 
 import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.net.Uri;
-import android.support.v4.util.ArrayMap;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Spinner;
-
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import info.goodline.imageswapper.R;
 import info.goodline.imageswapper.fragment.ImageViewFragment;
@@ -30,7 +19,7 @@ public class FragmentSwapperActivity extends BaseActivity implements AdapterView
     private static final String TAG=FragmentSwapperActivity.class.getSimpleName();
     private Spinner mScaleTypeSpinner;
     private Button  mFinishButton;
-    private StringBuffer mResultBuffer;
+    private StringBuilder mResultBuffer;
     private int mSwapCount=0;
     private boolean isFirstClick=true;
     private BaseBehavior fragmentFrom;
@@ -44,7 +33,7 @@ public class FragmentSwapperActivity extends BaseActivity implements AdapterView
 
         mScaleTypeSpinner = (Spinner) findViewById(R.id.scale_type_spinner);
         mFinishButton = (Button) findViewById(R.id.finish_button);
-        mResultBuffer = new StringBuffer();
+        mResultBuffer = new StringBuilder();
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.scale_type_array, android.R.layout.simple_spinner_item);
@@ -58,16 +47,18 @@ public class FragmentSwapperActivity extends BaseActivity implements AdapterView
     }
     private void replaceFrames(){
             int frameID;
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
         for (int i=1;i<=6;i++)
         {
             ImageViewFragment imageViewFragment = ImageViewFragment.newInstance(i, i);
             frameID=getResources()
                     .getIdentifier("fragment_container_" +(i), "id", getPackageName());
-            getFragmentManager().beginTransaction()
-                    .add(frameID, imageViewFragment)
-                    .commit();
-            fragmentActions.add(imageViewFragment);
+            fragmentTransaction
+                    .add(frameID, imageViewFragment);
+
+            registerBaseBehaviorListener(imageViewFragment);
         }
+        fragmentTransaction.commit();
 
     }
 
@@ -112,10 +103,10 @@ public class FragmentSwapperActivity extends BaseActivity implements AdapterView
         Log.d(TAG,"click to "+fragmentNumber);
         fragmentNumber = fragmentNumber-1;
         if(isFirstClick){
-            fragmentFrom = fragmentActions.get(fragmentNumber);
+            fragmentFrom = getBaseBehaviorListener(fragmentNumber);
             isFirstClick=false;
         }else{
-            fragmentTo = fragmentActions.get(fragmentNumber);
+            fragmentTo = getBaseBehaviorListener(fragmentNumber);
             if(fragmentTo.equals(fragmentFrom)){
                 fragmentTo.clearSelection();
                 isFirstClick=true;
@@ -126,14 +117,20 @@ public class FragmentSwapperActivity extends BaseActivity implements AdapterView
                isFirstClick=true;
                fragmentTo.clearSelection();
                fragmentFrom.clearSelection();
-               mResultBuffer.append("\n[" + (++mSwapCount)+","+fragmentFrom.getNumber()+","+fragmentTo.getNumber()+"]");
+                mResultBuffer.append("\n[")
+                             .append(++mSwapCount)
+                             .append(",")
+                             .append(fragmentFrom.getNumber())
+                             .append(",")
+                             .append(fragmentTo.getNumber())
+                             .append("]");
             }
         }
     }
 
     @Override
     protected void onDestroy() {
+        deleteAllListener();
         super.onPause();
-        fragmentActions = null;
     }
 }
