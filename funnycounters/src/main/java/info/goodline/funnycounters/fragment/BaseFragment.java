@@ -3,6 +3,7 @@ package info.goodline.funnycounters.fragment;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.TextView;
 
@@ -17,14 +18,14 @@ import info.goodline.funnycounters.activity.BaseActivity;
 public abstract class BaseFragment extends Fragment implements BaseActivity.CounterListener {
 
     private static final String TIMER_STATE = "BaseFragment.TIMER_STATE";
-    private Timer mFragmentTimer;
     protected volatile int mCounterValue = 0;
     private RegistratorListener mRegistratorListener;
+    Handler mTimerHandler;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mFragmentTimer = new Timer();
+        mTimerHandler = new Handler();
         if(savedInstanceState != null){
             mCounterValue=savedInstanceState.getInt(TIMER_STATE);
         }
@@ -46,27 +47,21 @@ public abstract class BaseFragment extends Fragment implements BaseActivity.Coun
     @Override
     public void onDetach() {
         super.onDetach();
-        mFragmentTimer.cancel();
-        mFragmentTimer.purge();
-        mFragmentTimer = null;
+        mTimerHandler.removeCallbacks(null);
         mRegistratorListener.unregisterListener(this);
         mRegistratorListener = null;
     }
 
     public void setupTimer(final TextView counterTextView) {
-        mFragmentTimer.scheduleAtFixedRate(new TimerTask() {
+        mTimerHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (counterTextView != null) {
-                            countTimer(counterTextView);
-                        }
-                    }
-                });
+                if (counterTextView != null) {
+                    countTimer(counterTextView);
+                }
+                mTimerHandler.postDelayed(this, 1000);
             }
-        }, 1000, 1000);
+        }, 1000);
     }
 
     @Override
@@ -86,9 +81,7 @@ public abstract class BaseFragment extends Fragment implements BaseActivity.Coun
 
     @Override
     public void deleteCounter() {
-        mFragmentTimer.cancel();
-        mFragmentTimer.purge();
-        mFragmentTimer = null;
+        mTimerHandler.removeCallbacks(null);
     }
 
     public abstract void countTimer(TextView counterTextView);
