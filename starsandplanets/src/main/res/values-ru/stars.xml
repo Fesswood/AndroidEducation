@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array
+        name="star_name">
+        <item>Солнце</item>
+        <item>Альдебаран</item>
+        <item>Мира</item>
+        <item>Полярная Звезда</item>
+    </array>
+</resources>
