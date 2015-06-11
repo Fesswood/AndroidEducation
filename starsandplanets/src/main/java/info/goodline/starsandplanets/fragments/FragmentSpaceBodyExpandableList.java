@@ -2,13 +2,16 @@ package info.goodline.starsandplanets.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import android.view.ViewGroup;
+import android.widget.ExpandableListView;
 import android.widget.ListView;
 
-
+import info.goodline.starsandplanets.R;
 import info.goodline.starsandplanets.activity.VisibilityChangeCallback;
+import info.goodline.starsandplanets.adapter.SpaceBodyExpandableListAdapter;
 import info.goodline.starsandplanets.adapter.SpaceBodyListAdapter;
 import info.goodline.starsandplanets.data.DummyContent;
 
@@ -21,7 +24,7 @@ import info.goodline.starsandplanets.data.DummyContent;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class FragmentSpaceBodyList extends ListFragment implements VisibilityChangeCallback {
+public class FragmentSpaceBodyExpandableList extends Fragment implements VisibilityChangeCallback {
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -39,7 +42,8 @@ public class FragmentSpaceBodyList extends ListFragment implements VisibilityCha
      * The current activated item position. Only used on landscape orientation.
      */
     private int mActivatedPosition = ListView.INVALID_POSITION;
-    private SpaceBodyListAdapter mAdapter;
+    private SpaceBodyExpandableListAdapter mAdapter;
+    private ExpandableListView mExpandableView;
 
     /**
      * A dummy implementation of the {@link Callbacks} interface that does
@@ -55,28 +59,30 @@ public class FragmentSpaceBodyList extends ListFragment implements VisibilityCha
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public FragmentSpaceBodyList() {
+    public FragmentSpaceBodyExpandableList() {
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mAdapter = new SpaceBodyListAdapter(getActivity());
+        mAdapter = new SpaceBodyExpandableListAdapter(getActivity());
 
         // TODO: replace with a real list adapter.
-        setListAdapter(mAdapter);
+
     }
-
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = inflater.inflate(android.R.layout.expandable_list_content, null);
+        mExpandableView = (ExpandableListView) v.findViewById(android.R.id.list);
+        mExpandableView.setAdapter(mAdapter);
         // Restore the previously serialized activated item position.
         if (savedInstanceState != null
                 && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
         }
+        return v;
     }
+
 
     @Override
     public void onAttach(Activity activity) {
@@ -93,19 +99,11 @@ public class FragmentSpaceBodyList extends ListFragment implements VisibilityCha
     @Override
     public void onDetach() {
         super.onDetach();
-
         // Reset the active callbacks interface to the dummy implementation.
         mCallbacks = sDummyCallbacks;
     }
 
-    @Override
-    public void onListItemClick(ListView listView, View view, int position, long id) {
-        super.onListItemClick(listView, view, position, id);
 
-        // Notify the active callbacks interface (the activity, if the
-        // fragment is attached to one) that an item has been selected.
-        mCallbacks.onItemSelected(position);
-    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -123,16 +121,16 @@ public class FragmentSpaceBodyList extends ListFragment implements VisibilityCha
     public void setActivateOnItemClick(boolean activateOnItemClick) {
         // When setting CHOICE_MODE_SINGLE, ListView will automatically
         // give items the 'activated' state when touched.
-        getListView().setChoiceMode(activateOnItemClick
+        mExpandableView.setChoiceMode(activateOnItemClick
                 ? ListView.CHOICE_MODE_SINGLE
                 : ListView.CHOICE_MODE_NONE);
     }
 
     private void setActivatedPosition(int position) {
         if (position == ListView.INVALID_POSITION) {
-            getListView().setItemChecked(mActivatedPosition, false);
+            mExpandableView.setItemChecked(mActivatedPosition, false);
         } else {
-            getListView().setItemChecked(position, true);
+            mExpandableView.setItemChecked(position, true);
         }
 
         mActivatedPosition = position;

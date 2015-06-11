@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="planets_name">
+        <item>Меркурий</item>
+        <item>Венера</item>
+        <item>Дом Милый Дом</item>
+        <item>Марс</item>
+        <item>Юпитер</item>
+        <item>Сатурн</item>
+        <item>Уран</item>
+        <item>Нептун</item>
+    </string-array>
+</resources>

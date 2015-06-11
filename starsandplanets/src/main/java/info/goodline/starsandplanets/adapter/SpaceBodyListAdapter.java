@@ -25,13 +25,14 @@ private final Context mContext;
 private LayoutInflater mInflater;
 
 public SpaceBodyListAdapter(Context context) {
-        super(context, R.layout.news_list_item);
+        super(context, R.layout.spacebody_list_item);
         mNewslist=new ArrayList<>();
         mContext=context;
         mInflater= (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
     mNewslist.addAll(SpaceBody.getSpaceBodyFromResource(SpaceBody.FLAG_GET_GALAXIES, mContext.getResources()));
     mNewslist.addAll(SpaceBody.getSpaceBodyFromResource(SpaceBody.FLAG_GET_STARS, mContext.getResources()));
+    mNewslist.addAll(SpaceBody.getSpaceBodyFromResource(SpaceBody.FLAG_GET_PLANETS, mContext.getResources()));
 
 }
 
@@ -41,14 +42,14 @@ public View getView(int position, View convertView, ViewGroup parent) {
         SpaceBody spaceBody = mNewslist.get(position);
         ViewHolder holder;
         if(convertView == null) {
-        convertView = mInflater.inflate(R.layout.news_list_item, null, true);
+        convertView = mInflater.inflate(R.layout.spacebody_list_item, null, true);
         holder  = getViewHolder(convertView);
         } else{
         holder = (ViewHolder) convertView.getTag();
         }
 
         holder.titleView.setText(spaceBody.getName());
-        holder.dateView.setText(spaceBody.getLink());
+
 
         return convertView;
         }
@@ -63,7 +64,7 @@ private ViewHolder getViewHolder(View convertView) {
         ViewHolder holder;
         holder = new ViewHolder();
         holder.titleView = (TextView) convertView.findViewById(R.id.news_title);
-        holder.dateView = (TextView) convertView.findViewById(R.id.news_date);
+
         convertView.setTag(holder);
         return holder;
         }

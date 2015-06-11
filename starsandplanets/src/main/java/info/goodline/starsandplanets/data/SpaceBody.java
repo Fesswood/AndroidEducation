@@ -26,9 +26,13 @@ public class SpaceBody {
         mLink = link;
     }
 
-    public static String[] getSpaceBodyGroup( Resources resources) {
+    public static  ArrayList<String> getSpaceBodyGroup( Resources resources) {
         String[] groupNames = resources.getStringArray(R.array.space_body_group_name);
-        return groupNames;
+        ArrayList<String> spaceBodyArrayList=new ArrayList<>(groupNames.length);
+        for(String groupName:groupNames){
+            spaceBodyArrayList.add(groupName);
+        }
+        return spaceBodyArrayList;
     }
 
 
@@ -61,7 +65,15 @@ public class SpaceBody {
                 return spaceBodyArrayList;
 
             case FLAG_GET_PLANETS:
-                throw new IllegalArgumentException("Not implimented yet.");
+                spaceBodies = resources.getStringArray(R.array.planets_name);
+                spaceBodiesLinks = resources.getStringArray(R.array.planet_link);
+                spaceBodyArrayList = new ArrayList<>(spaceBodies.length);
+                for (int i = 0; i < spaceBodies.length; i++) {
+                    SpaceBody spaceBody=new SpaceBody(spaceBodies[i],spaceBodiesLinks[i]);
+                    spaceBodyArrayList.add(spaceBody);
+                }
+
+                return spaceBodyArrayList;
             default:
                 return new ArrayList<>();
         }
