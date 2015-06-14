@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array
+        name="space_body_group_name">
+        <item>Галактики</item>
+        <item>Туманности</item>
+        <item>Звёзды</item>
+        <item>Планеты</item>
+    </array>
+</resources>
