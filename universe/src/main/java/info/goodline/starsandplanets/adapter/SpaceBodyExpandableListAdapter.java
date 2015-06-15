@@ -5,6 +5,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -25,6 +27,7 @@ public class SpaceBodyExpandableListAdapter extends BaseExpandableListAdapter im
     private ArrayList<ArrayList<SpaceBody>> mGroups;
     private ArrayList<String> mGroupsNames;
     private Context mContext;
+
 
     public SpaceBodyExpandableListAdapter(Context context) {
         if (!(context instanceof Callbacks)) {
@@ -113,7 +116,7 @@ public class SpaceBodyExpandableListAdapter extends BaseExpandableListAdapter im
 
         TextView textGroup = (TextView) convertView.findViewById(R.id.textGroup);
         textGroup.setText(mGroupsNames.get(groupPosition));
-
+        ((ExpandableListView) parent).expandGroup(groupPosition);
         return convertView;
 
     }
@@ -141,7 +144,6 @@ public class SpaceBodyExpandableListAdapter extends BaseExpandableListAdapter im
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
-        mCallbacks.onItemSelected(mOffset[groupPosition]+childPosition);
         return true;
     }
     /**
@@ -158,19 +160,55 @@ public class SpaceBodyExpandableListAdapter extends BaseExpandableListAdapter im
         return holder;
     }
 
-    @Override
-    public void deleteItem(int position, int group) {
-       //  this.get
-        notifyDataSetChanged();
+    public SpaceBody getItemForDelete(long id) {
+        if (ExpandableListView.getPackedPositionType(id) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+            int mCurrentGroupPosition = ExpandableListView.getPackedPositionGroup(id);
+            int mCurrentPosition = ExpandableListView.getPackedPositionChild(id);
+            return mGroups.get(mCurrentGroupPosition).get(mCurrentPosition);
+        };
+        return new SpaceBody();
     }
+
+    @Override
+    public void deleteItem(SpaceBody spaceBody) {
+        for (ArrayList<SpaceBody> group:mGroups){
+            int i = group.indexOf(spaceBody);
+            if(i != -1){
+                group.remove(i);
+                break;
+            }
+        }
+    }
+
+    @Override
+    public SpaceBody getItem(int group, int position) {
+        try {
+            throw new Exception("Not implimented yet.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    @Override
+    public void setItemFavorite(SpaceBody selectedSpaceBody) {
+
+    }
+
 
     /**
      * implementation of ViewHolder pattern for SpaceBodyListAdapter
      */
     static class ViewHolder {
-        public ImageView imageView;
         public TextView titleView;
-        public TextView dateView;
-        public TextView descView;
     }
+    public int[] getOffset() {
+        return mOffset;
+    }
+
+    public void setOffset(int[] offset) {
+        mOffset = offset;
+    }
+
 }

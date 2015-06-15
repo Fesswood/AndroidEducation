@@ -2,7 +2,6 @@ package info.goodline.starsandplanets.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +11,7 @@ import android.widget.ListView;
 import info.goodline.starsandplanets.R;
 import info.goodline.starsandplanets.activity.ListStateChangeListener;
 import info.goodline.starsandplanets.adapter.SpaceBodyExpandableListAdapter;
+import info.goodline.starsandplanets.data.SpaceBody;
 
 /**
  * A list fragment representing a list of spaceBodies. This fragment
@@ -22,7 +22,7 @@ import info.goodline.starsandplanets.adapter.SpaceBodyExpandableListAdapter;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class FragmentSpaceBodyExpandableList extends BaseFragment implements ListStateChangeListener {
+public class FragmentSpaceBodyExpandableList extends BaseFragment implements ListStateChangeListener, ExpandableListView.OnChildClickListener {
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -51,6 +51,11 @@ public class FragmentSpaceBodyExpandableList extends BaseFragment implements Lis
         @Override
         public void onItemSelected(int id) {
         }
+
+        @Override
+        public void sendFavoriteSpaceBody(SpaceBody favoriteSpaceBody) {
+
+        }
     };
 
     /**
@@ -74,7 +79,8 @@ public class FragmentSpaceBodyExpandableList extends BaseFragment implements Lis
         mExpandableView = (ExpandableListView) v.findViewById(R.id.spacebody_expandable_list_view);
         mExpandableView.setAdapter(mAdapter);
         mExpandableView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        super.listViewWithContextMenu=mExpandableView;
+        mExpandableView.setOnChildClickListener(this);
+        super.mChildListView =mExpandableView;
         // Restore the previously serialized activated item position.
         if (savedInstanceState != null
                 && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
@@ -145,11 +151,22 @@ public class FragmentSpaceBodyExpandableList extends BaseFragment implements Lis
 
     @Override
     public void setCurrentItem(int position) {
-        mExpandableView.setItemChecked(position,true);
+        mExpandableView.setItemChecked(position, true);
     }
 
     @Override
-    public void deleteItem(int position) {
-        mAdapter.deleteItem(position,0);
+    public void deleteItem(SpaceBody id) {
+        mAdapter.deleteItem(id);
+    }
+
+    @Override
+    public void sendFavoriteState(SpaceBody favoriteSpaceBody) {
+        mCallbacks.sendFavoriteSpaceBody(favoriteSpaceBody);
+    }
+
+    @Override
+    public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+        mCallbacks.onItemSelected(mAdapter.getOffset()[groupPosition]+childPosition);
+        return false;
     }
 }

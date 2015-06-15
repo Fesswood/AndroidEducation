@@ -1,7 +1,30 @@
-<WebView xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:id="@+id/spacebody_detail_container"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             tools:context=".spaceBodyDetailActivity"
-             tools:ignore="MergeRootFrame"/>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".spaceBodyDetailActivity">
+    <WebView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/spacebody_detail_container"
+        tools:ignore="MergeRootFrame"/>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imgtop"
+        android:src="@drawable/blink"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        tools:ignore="MergeRootFrame"/>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imgFavorite"
+        android:src="@drawable/drawable_list_item_bg"
+        tools:ignore="MergeRootFrame"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"/>
+
+</RelativeLayout>
+

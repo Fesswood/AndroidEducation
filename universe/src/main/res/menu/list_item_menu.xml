@@ -6,5 +6,5 @@
         app:showAsAction="ifRoom"/>
     <item android:id="@+id/favorite"
         android:title="@string/favorite"
-        android:actionLayout="@layout/menu_spacebody_favorite"/>
+       />
 </menu>

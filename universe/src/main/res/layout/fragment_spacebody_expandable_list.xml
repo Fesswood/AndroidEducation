@@ -5,6 +5,7 @@
     <ExpandableListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:descendantFocusability="blocksDescendants"
         android:id="@+id/spacebody_expandable_list_view"
         android:layout_gravity="center_horizontal" />
 </LinearLayout>

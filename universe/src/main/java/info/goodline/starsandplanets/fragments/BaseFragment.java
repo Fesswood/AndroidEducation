@@ -4,13 +4,15 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.internal.widget.AdapterViewCompat;
+import android.support.v7.widget.PopupMenu;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import info.goodline.starsandplanets.R;
@@ -20,47 +22,88 @@ import info.goodline.starsandplanets.data.SpaceBody;
 /**
  * Created by fesswood on 14.06.15.
  */
-public class BaseFragment extends Fragment  implements Callbacks{
+public class BaseFragment extends Fragment  implements AdapterView.OnItemLongClickListener, PopupMenu.OnMenuItemClickListener {
 
-    protected ListView listViewWithContextMenu;
+    protected ListView mChildListView;
     private AdapterDataChangeListener mAdapter;
     private DeleteListItemCallbackListener mDeleteListItemCallbackListener;
     private int mCurrentPosition;
+    private int mCurrentGroupPosition;
+    private long mItemId;
+    private SpaceBody mSelectedSpaceBody;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if(listViewWithContextMenu!=null){
-            registerForContextMenu(listViewWithContextMenu);
-        }else{
-            throw new IllegalArgumentException("listViewWithContextMenu is null!");
+        if(mChildListView != null && mChildListView instanceof ExpandableListView){
+            ExpandableListAdapter adapter = ((ExpandableListView)mChildListView).getExpandableListAdapter();
+
+            mAdapter= (AdapterDataChangeListener) adapter;
+        }else if(mChildListView != null){
+            mAdapter= (AdapterDataChangeListener)mChildListView.getAdapter();
         }
+        attachClickListeners();
+        attachDeleteListener();
+    }
+
+
+
+
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mAdapter=null;
+        mDeleteListItemCallbackListener=null;
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        showPopupMenu(view);
+        mItemId=id;
+        if(mChildListView instanceof ExpandableListView){
+            if (ExpandableListView.getPackedPositionType(id) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+                mCurrentGroupPosition = ExpandableListView.getPackedPositionGroup(id);
+                mCurrentPosition = ExpandableListView.getPackedPositionChild(id);
+                return true;
+            }
+        }else{
+            mCurrentPosition=position;
+            mCurrentGroupPosition=0;
+        }
+
+        mSelectedSpaceBody=mAdapter.getItem(mCurrentGroupPosition,mCurrentPosition);
+        return false;
+    }
+
+    private void attachDeleteListener() {
         if(getActivity() instanceof DeleteListItemCallbackListener){
             mDeleteListItemCallbackListener=(DeleteListItemCallbackListener)getActivity();
         }else{
             throw new IllegalArgumentException("Activity must implements  DeleteListItemCallbackListener!");
         }
     }
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-            ListView lv = (ListView) v;
-            AdapterView.AdapterContextMenuInfo acmi = (AdapterView.AdapterContextMenuInfo) menuInfo;
-            SpaceBody obj = (SpaceBody) lv.getItemAtPosition(acmi.position);
 
-            if(lv.getAdapter() instanceof  AdapterDataChangeListener){
-                mAdapter = (AdapterDataChangeListener) lv.getAdapter();
-            }else{
-                throw new IllegalArgumentException("Adapter must implements AdapterDataChangeListener!");
-            }
-            String title = obj.getName();
-            menu.setHeaderTitle(title);
-
-            MenuInflater inflater = getActivity().getMenuInflater();
-            inflater.inflate(R.menu.list_item_menu, menu);
+    private void attachClickListeners() {
+        if(mChildListView !=null ){
+            mChildListView.setOnItemLongClickListener(this);
+        }else{
+            throw new IllegalArgumentException("mChildListView is null!");
+        }
     }
+    private void showPopupMenu(View v) {
+        PopupMenu popupMenu = new PopupMenu(getActivity(), v);
+        MenuInflater inflate = popupMenu.getMenuInflater();
+        inflate.inflate(R.menu.list_item_menu, popupMenu.getMenu());
+        MenuItem menuItem= popupMenu.getMenu().findItem(R.id.favorite);
+        menuItem.setCheckable(true);
+        popupMenu.setOnMenuItemClickListener(this);
+        popupMenu.show();
+    }
+
     @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
             case R.id.delete:
                 AlertDialog.Builder adb=new AlertDialog.Builder(getActivity());
                 adb.setTitle(getActivity().getResources().getString(R.string.delete_question));
@@ -69,18 +112,17 @@ public class BaseFragment extends Fragment  implements Callbacks{
                 adb.setPositiveButton("Ok", new AlertDialog.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mAdapter.deleteItem(mCurrentPosition,0);
-                        mDeleteListItemCallbackListener.deleteFromOtherList(mCurrentPosition);
+                        mAdapter.deleteItem(mSelectedSpaceBody);
+                        mDeleteListItemCallbackListener.deleteFromOtherList(mSelectedSpaceBody);
                     }});
                 adb.show();
                 return true;
+            case R.id.favorite:
+                menuItem.setChecked(true);
+                mAdapter.setItemFavorite(mSelectedSpaceBody);
+                return true;
             default:
-                return super.onContextItemSelected(item);
+                return super.onContextItemSelected(menuItem);
         }
-    }
-
-    @Override
-    public void onItemSelected(int pos) {
-        mCurrentPosition=pos;
     }
 }

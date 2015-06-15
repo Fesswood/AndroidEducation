@@ -10,6 +10,7 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -20,20 +21,22 @@ import info.goodline.starsandplanets.R;
 import info.goodline.starsandplanets.activity.ViewPagerCallback;
 import info.goodline.starsandplanets.data.SpaceBody;
 import info.goodline.starsandplanets.fragments.FragmentSpaceBodyDetail;
+import info.goodline.starsandplanets.fragments.FragmentSpaceBodyExpandableList;
 
 /**
  * Created by sergeyb on 10.06.15.
  */
-public class SpaceBodyViewPagerAdapter extends FragmentPagerAdapter {
+public class SpaceBodyViewPagerAdapter extends FragmentStatePagerAdapter {
 /**
  * List of news topics
  */
 private ArrayList<SpaceBody> mNewslist;
+private ArrayList<SpaceBody> mFavorite = new ArrayList<>();
 private final Context mContext;
 private LayoutInflater mInflater;
 
 
-public SpaceBodyViewPagerAdapter(FragmentManager fm, Context context) {
+    public SpaceBodyViewPagerAdapter(FragmentManager fm, Context context) {
         super(fm);
         mNewslist=new ArrayList<>();
         mContext=context;
@@ -46,22 +49,23 @@ public SpaceBodyViewPagerAdapter(FragmentManager fm, Context context) {
 }
 
 
-
-
-
-@Override
-public int getCount() {
+        @Override
+        public int getCount() {
         return mNewslist.size();
         }
 
 
         @Override
-public Fragment getItem(int position) {
-        return FragmentSpaceBodyDetail.newInstance(mNewslist.get(position).getLink());
-
+        public Fragment getItem(int position) {
+          return FragmentSpaceBodyDetail.newInstance(mNewslist.get(position));
         }
+    @Override
+    public int getItemPosition(Object object) {
+        return  PagerAdapter.POSITION_NONE;
+    }
 
-/**
+
+    /**
  * Add list with news to current NewsList
  * @param parsedNewsList list to add
  */
@@ -86,14 +90,24 @@ public void prependNewsList(ArrayList<SpaceBody> newsList) {
         notifyDataSetChanged();
         }
 
+    public void deleteItem(SpaceBody itemForDeleted) {
+        int i = mNewslist.indexOf(itemForDeleted);
+        SpaceBody spaceBody = mNewslist.get(i);
+        mNewslist.remove(i);
+        notifyDataSetChanged();
+    }
+
+    public void setFavorite(SpaceBody favoriteSpaceBody) {
+        int i = mNewslist.indexOf(favoriteSpaceBody);
+        mNewslist.get(i).setFavorite(true);
+        mFavorite.add(favoriteSpaceBody);
+    }
+
 
     /**
  * implementation of ViewHolder pattern for SpaceBodyListAdapter
  */
 static class ViewHolder {
-    public ImageView imageView;
-    public TextView titleView;
-    public TextView dateView;
-    public TextView descView;
+    public WebView imageView;
 }
 }

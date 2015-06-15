@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +16,7 @@ import android.widget.ListView;
 import info.goodline.starsandplanets.R;
 import info.goodline.starsandplanets.activity.ListStateChangeListener;
 import info.goodline.starsandplanets.adapter.SpaceBodyListAdapter;
+import info.goodline.starsandplanets.data.SpaceBody;
 
 /**
  * A list fragment representing a list of spaceBodies. This fragment
@@ -50,10 +50,16 @@ public class FragmentSpaceBodyList extends BaseFragment implements ListStateChan
     /**
      * A dummy implementation of the {@link Callbacks} interface that does
      * nothing. Used only when this fragment is not attached to an activity.
+     *
      */
     private static Callbacks sDummyCallbacks = new Callbacks() {
         @Override
         public void onItemSelected(int id) {
+        }
+
+        @Override
+        public void sendFavoriteSpaceBody(SpaceBody favoriteSpaceBody) {
+
         }
     };
     private ListView mListView;
@@ -68,7 +74,7 @@ public class FragmentSpaceBodyList extends BaseFragment implements ListStateChan
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mAdapter = new SpaceBodyListAdapter(getActivity());
+        mAdapter = new SpaceBodyListAdapter(getActivity(),this);
         // TODO: replace with a real list adapter.
     }
 
@@ -78,7 +84,7 @@ public class FragmentSpaceBodyList extends BaseFragment implements ListStateChan
         View v = inflater.inflate(R.layout.fragment_spacebody_list, null);
         mListView = (ListView) v.findViewById(R.id.spacebody_list_view);
         mListView.setAdapter(mAdapter);
-        super.listViewWithContextMenu=mListView;
+        super.mChildListView =mListView;
         return v;
     }
 
@@ -116,9 +122,8 @@ public class FragmentSpaceBodyList extends BaseFragment implements ListStateChan
     @Override
     public void onDetach() {
         super.onDetach();
-
-        // Reset the active callbacks interface to the dummy implementation.
-        mCallbacks = sDummyCallbacks;
+        // Reset the active callbacks interface
+        mCallbacks = null;
     }
 
     @Override
@@ -161,16 +166,23 @@ public class FragmentSpaceBodyList extends BaseFragment implements ListStateChan
 
     @Override
     public void setCurrentItem(int position) {
-       mListView.setItemChecked(position,true);
+       mListView.setItemChecked(position, true);
     }
 
     @Override
-    public void deleteItem(int position) {
-        mAdapter.deleteItem(position,0);
+    public void deleteItem(SpaceBody id) {
+        mAdapter.deleteItem(id);
     }
 
     @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        mCallbacks.onItemSelected(i);
+    public void sendFavoriteState(SpaceBody favoriteSpaceBody) {
+        mCallbacks.sendFavoriteSpaceBody(favoriteSpaceBody);
+    }
+
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+        setActivatedPosition(position);
+        mCallbacks.onItemSelected(position);
     }
 }

@@ -7,25 +7,31 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content">
 
-    <LinearLayout
-        android:orientation="vertical"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:padding="@dimen/abc_action_bar_content_inset_material"
         android:layout_marginRight="15dp"
         android:gravity="center_vertical|end">
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            xmlns:android="http://schemas.android.com/apk/res/android"
 
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:src="@drawable/blink"
+            android:id="@+id/favorite_check"
+            android:layout_alignParentLeft="true"
+           />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            xmlns:android="http://schemas.android.com/apk/res/android"
             android:textAppearance="?android:textAppearanceLarge"
             android:textColor="@color/abc_primary_text_material_light"
             tools:text="News Title"
             android:textSize="15dp"
             android:id="@+id/news_title"
-            android:gravity="right"/>
-    </LinearLayout>
+            android:layout_alignParentRight="true"/>
+    </RelativeLayout>
 </LinearLayout>

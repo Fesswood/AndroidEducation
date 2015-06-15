@@ -17,6 +17,7 @@ public class SpaceBody {
 
     private String mName;
     private String mLink;
+    private boolean mFavorite;
 
     public SpaceBody() {
     }
@@ -92,5 +93,19 @@ public class SpaceBody {
 
     public void setLink(String link) {
         mLink = link;
+    }
+
+    @Override
+    public boolean equals(Object otherObject) {
+        SpaceBody other = (SpaceBody) otherObject;
+        return super.equals(other) || (this.getLink().equals(other.getLink()) && this.getName().equals(other.getName()));
+    }
+
+    public void setFavorite(boolean favorite) {
+        mFavorite = favorite;
+    }
+
+    public boolean isFavorite() {
+        return mFavorite;
     }
 }
