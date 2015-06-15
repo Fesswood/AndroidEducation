@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <array
-        name="spinner_values">
-        <item>ListView</item>
-        <item>ExpandableListView</item>
-    </array>
-</resources>
