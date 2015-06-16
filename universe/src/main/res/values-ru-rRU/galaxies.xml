@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <array
-        name="galaxy_name">
+    <array name="galaxy_name">
         <item>Млечный Путь</item>
         <item>Галактика Андромеды</item>
         <item>Галактика Самбрерро</item>

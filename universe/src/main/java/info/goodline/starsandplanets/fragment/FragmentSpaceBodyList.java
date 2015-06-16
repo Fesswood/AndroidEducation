@@ -1,4 +1,4 @@
-package info.goodline.starsandplanets.fragments;
+package info.goodline.starsandplanets.fragment;
 
 import android.animation.LayoutTransition;
 import android.annotation.TargetApi;
@@ -12,56 +12,57 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-
 import info.goodline.starsandplanets.R;
-import info.goodline.starsandplanets.activity.ListStateChangeListener;
 import info.goodline.starsandplanets.adapter.SpaceBodyListAdapter;
 import info.goodline.starsandplanets.data.SpaceBody;
+import info.goodline.starsandplanets.listener.ActivityItemStateListener;
+import info.goodline.starsandplanets.listener.FragmentListStateChangeListener;
 
 /**
  * A list fragment representing a list of spaceBodies. This fragment
  * also supports tablet devices by allowing list items to be given an
  * 'activated' state upon selection. This helps indicate which item is
  * currently being viewed in a {@link FragmentSpaceBodyDetail}.
- * <p>
- * Activities containing this fragment MUST implement the {@link Callbacks}
+ * <p/>
+ * Activities containing this fragment MUST implement the {@link ActivityItemStateListener}
  * interface.
  */
-public class FragmentSpaceBodyList extends BaseFragment implements ListStateChangeListener, AdapterView.OnItemClickListener {
+public class FragmentSpaceBodyList extends BaseFragment implements FragmentListStateChangeListener, AdapterView.OnItemClickListener {
 
     /**
      * The serialization (saved instance state) Bundle key representing the
      * activated item position. Only used on landscape orientation.
      */
     private static final String STATE_ACTIVATED_POSITION = "activated_position";
-
     /**
-     * The fragment's current callback object, which is notified of list item
-     * clicks.
-     */
-    private Callbacks mCallbacks = sDummyCallbacks;
-
-    /**
-     * The current activated item position. Only used on landscape orientation.
-     */
-    private int mActivatedPosition = ListView.INVALID_POSITION;
-    private SpaceBodyListAdapter mAdapter;
-
-    /**
-     * A dummy implementation of the {@link Callbacks} interface that does
+     * A dummy implementation of the {@link ActivityItemStateListener} interface that does
      * nothing. Used only when this fragment is not attached to an activity.
-     *
      */
-    private static Callbacks sDummyCallbacks = new Callbacks() {
+    private static ActivityItemStateListener sDummyActivityItemStateListener = new ActivityItemStateListener() {
         @Override
         public void onItemSelected(int id) {
         }
 
         @Override
-        public void sendFavoriteSpaceBody(SpaceBody favoriteSpaceBody) {
+        public void changeStateFavoriteItem(SpaceBody favoriteSpaceBody, boolean isChecked) {
+
+        }
+
+        @Override
+        public void deleteFromOtherList(SpaceBody id) {
 
         }
     };
+    /**
+     * The fragment's current callback object, which is notified of list item
+     * clicks.
+     */
+    private ActivityItemStateListener mActivityItemStateListener = sDummyActivityItemStateListener;
+    /**
+     * The current activated item position. Only used on landscape orientation.
+     */
+    private int mActivatedPosition = ListView.INVALID_POSITION;
+    private SpaceBodyListAdapter mAdapter;
     private ListView mListView;
 
     /**
@@ -74,7 +75,7 @@ public class FragmentSpaceBodyList extends BaseFragment implements ListStateChan
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mAdapter = new SpaceBodyListAdapter(getActivity(),this);
+        mAdapter = new SpaceBodyListAdapter(getActivity(), this);
         // TODO: replace with a real list adapter.
     }
 
@@ -84,7 +85,7 @@ public class FragmentSpaceBodyList extends BaseFragment implements ListStateChan
         View v = inflater.inflate(R.layout.fragment_spacebody_list, null);
         mListView = (ListView) v.findViewById(R.id.spacebody_list_view);
         mListView.setAdapter(mAdapter);
-        super.mChildListView =mListView;
+        super.mChildListView = mListView;
         return v;
     }
 
@@ -103,9 +104,9 @@ public class FragmentSpaceBodyList extends BaseFragment implements ListStateChan
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void enableTransitionAnimation() {
-        LayoutTransition lt=new LayoutTransition();
+        LayoutTransition lt = new LayoutTransition();
         lt.enableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
-       mListView.setLayoutTransition(new LayoutTransition());
+        mListView.setLayoutTransition(new LayoutTransition());
     }
 
     @Override
@@ -113,17 +114,17 @@ public class FragmentSpaceBodyList extends BaseFragment implements ListStateChan
         super.onAttach(activity);
 
         // Activities containing this fragment must implement its callbacks.
-        if (!(activity instanceof Callbacks)) {
+        if (!(activity instanceof ActivityItemStateListener)) {
             throw new IllegalStateException("Activity must implement fragment's callbacks.");
         }
-        mCallbacks = (Callbacks) activity;
+        mActivityItemStateListener = (ActivityItemStateListener) activity;
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         // Reset the active callbacks interface
-        mCallbacks = null;
+        mActivityItemStateListener = null;
     }
 
     @Override
@@ -142,20 +143,21 @@ public class FragmentSpaceBodyList extends BaseFragment implements ListStateChan
     public void setActivateOnItemClick(boolean activateOnItemClick) {
         // When setting CHOICE_MODE_SINGLE, ListView will automatically
         // give items the 'activated' state when touched.
-       mListView.setChoiceMode(activateOnItemClick
-               ? ListView.CHOICE_MODE_SINGLE
-               : ListView.CHOICE_MODE_NONE);
+        mListView.setChoiceMode(activateOnItemClick
+                ? ListView.CHOICE_MODE_SINGLE
+                : ListView.CHOICE_MODE_NONE);
     }
 
     private void setActivatedPosition(int position) {
         if (position == ListView.INVALID_POSITION) {
-           mListView.setItemChecked(mActivatedPosition, false);
+            mListView.setItemChecked(mActivatedPosition, false);
         } else {
-           mListView.setItemChecked(position, true);
+            mListView.setItemChecked(position, true);
         }
 
         mActivatedPosition = position;
     }
+
     /**
      * Switch visibility of listview when activity's spinner change item
      */
@@ -165,9 +167,10 @@ public class FragmentSpaceBodyList extends BaseFragment implements ListStateChan
     }
 
     @Override
-    public void setCurrentItem(int position) {
-       mListView.setItemChecked(position, true);
+    public void setCurrentItem(int position, @Nullable SpaceBody spaceBody) {
+        mListView.setItemChecked(position, true);
     }
+
 
     @Override
     public void deleteItem(SpaceBody id) {
@@ -175,14 +178,13 @@ public class FragmentSpaceBodyList extends BaseFragment implements ListStateChan
     }
 
     @Override
-    public void sendFavoriteState(SpaceBody favoriteSpaceBody) {
-        mCallbacks.sendFavoriteSpaceBody(favoriteSpaceBody);
+    public void changeStateFavoriteItem(SpaceBody favoriteSpaceBody, boolean isChecked) {
+        mActivityItemStateListener.changeStateFavoriteItem(favoriteSpaceBody, isChecked);
     }
-
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
         setActivatedPosition(position);
-        mCallbacks.onItemSelected(position);
+        mActivityItemStateListener.onItemSelected(position);
     }
 }

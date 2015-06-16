@@ -1,42 +1,39 @@
 package info.goodline.starsandplanets.adapter;
 
 import android.content.Context;
-import android.os.Handler;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
 import info.goodline.starsandplanets.R;
-import info.goodline.starsandplanets.activity.ListStateChangeListener;
 import info.goodline.starsandplanets.data.SpaceBody;
-import info.goodline.starsandplanets.fragments.FragmentSpaceBodyList;
+import info.goodline.starsandplanets.listener.AdapterDataChangeListener;
+import info.goodline.starsandplanets.listener.FragmentListStateChangeListener;
 
 /**
  * Created by sergeyb on 10.06.15.
  */
 public class SpaceBodyListAdapter extends ArrayAdapter<SpaceBody> implements AdapterDataChangeListener, CompoundButton.OnCheckedChangeListener {
+    private final Context mContext;
+    FragmentListStateChangeListener mListStateChangeListener;
     /**
      * List of news topics
      */
     private ArrayList<SpaceBody> mSpaceBodyList;
-    private final Context mContext;
     private LayoutInflater mInflater;
-    ListStateChangeListener mListStateChangeListener;
     private ArrayList<SpaceBody> mFavorite = new ArrayList<>();
 
-    public SpaceBodyListAdapter(Context context, ListStateChangeListener fragmentSpaceBodyList) {
+    public SpaceBodyListAdapter(Context context, FragmentListStateChangeListener fragmentSpaceBodyList) {
         super(context, R.layout.spacebody_list_item);
         mSpaceBodyList = new ArrayList<>();
         mContext = context;
-        mListStateChangeListener=fragmentSpaceBodyList;
+        mListStateChangeListener = fragmentSpaceBodyList;
         mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         mSpaceBodyList.addAll(SpaceBody.getSpaceBodyFromResource(SpaceBody.FLAG_GET_GALAXIES, mContext.getResources()));
@@ -151,9 +148,9 @@ public class SpaceBodyListAdapter extends ArrayAdapter<SpaceBody> implements Ada
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         Object tag = buttonView.getTag();
-        if(tag !=null){
-            mFavorite.add((SpaceBody)tag);
-            mListStateChangeListener.setItemFavorite((SpaceBody)tag);
+        if (tag != null) {
+            mFavorite.add((SpaceBody) tag);
+            mListStateChangeListener.changeStateFavoriteItem((SpaceBody) tag, isChecked);
         }
     }
 

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <array
-        name="planet_link">
+    <array name="planet_link">
         <item>https://en.wikipedia.org/wiki/Sun</item>
         <item>https://en.wikipedia.org/wiki/Aldebaran</item>
         <item>https://en.wikipedia.org/wiki/Mira</item>

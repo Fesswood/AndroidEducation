@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Delete item</string>
+    <string name="bad_index">There is no such index</string>
 </resources>

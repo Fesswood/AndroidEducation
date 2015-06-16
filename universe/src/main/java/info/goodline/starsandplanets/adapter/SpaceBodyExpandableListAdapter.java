@@ -5,24 +5,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
 import info.goodline.starsandplanets.R;
-import info.goodline.starsandplanets.data.DummyContent;
 import info.goodline.starsandplanets.data.SpaceBody;
-import info.goodline.starsandplanets.fragments.Callbacks;
+import info.goodline.starsandplanets.listener.ActivityItemStateListener;
+import info.goodline.starsandplanets.listener.AdapterDataChangeListener;
 
 /**
  * Created by sergeyb on 10.06.15.
  */
-public class SpaceBodyExpandableListAdapter extends BaseExpandableListAdapter implements AdapterDataChangeListener{
+public class SpaceBodyExpandableListAdapter extends BaseExpandableListAdapter implements AdapterDataChangeListener {
     private final LayoutInflater mInflater;
-    private final Callbacks mCallbacks;
+    private final ActivityItemStateListener mActivityItemStateListener;
     private int[] mOffset;
     private ArrayList<ArrayList<SpaceBody>> mGroups;
     private ArrayList<String> mGroupsNames;
@@ -30,37 +28,37 @@ public class SpaceBodyExpandableListAdapter extends BaseExpandableListAdapter im
 
 
     public SpaceBodyExpandableListAdapter(Context context) {
-        if (!(context instanceof Callbacks)) {
+        if (!(context instanceof ActivityItemStateListener)) {
             throw new IllegalStateException("Activity must implement fragment's callbacks.");
         }
 
-        mCallbacks = (Callbacks) context;
+        mActivityItemStateListener = (ActivityItemStateListener) context;
         mContext = context;
-        mInflater= (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mGroups = new ArrayList<>();
-        mGroupsNames= new ArrayList<String>(SpaceBody.getSpaceBodyGroup(mContext.getResources()));
+        mGroupsNames = new ArrayList<String>(SpaceBody.getSpaceBodyGroup(mContext.getResources()));
         mGroups.add(SpaceBody.getSpaceBodyFromResource(SpaceBody.FLAG_GET_GALAXIES, mContext.getResources()));
         mGroups.add(new ArrayList<SpaceBody>());
         mGroups.add(SpaceBody.getSpaceBodyFromResource(SpaceBody.FLAG_GET_STARS, mContext.getResources()));
         mGroups.add(SpaceBody.getSpaceBodyFromResource(SpaceBody.FLAG_GET_STARS, mContext.getResources()));
-        mOffset=new int[mGroups.size()];
-        int off=0;
-        for (int i=0;i<mGroups.size();i++) {
-            mOffset[i]=off;
-            int vr=mGroups.get(i).size();
-            off+=vr;
+        mOffset = new int[mGroups.size()];
+        int off = 0;
+        for (int i = 0; i < mGroups.size(); i++) {
+            mOffset[i] = off;
+            int vr = mGroups.get(i).size();
+            off += vr;
         }
     }
 
-    public SpaceBodyExpandableListAdapter(Context context, ArrayList<ArrayList<SpaceBody>> groups){
-        if (!(context instanceof Callbacks)) {
+    public SpaceBodyExpandableListAdapter(Context context, ArrayList<ArrayList<SpaceBody>> groups) {
+        if (!(context instanceof ActivityItemStateListener)) {
             throw new IllegalStateException("Activity must implement fragment's callbacks.");
         }
 
-        mCallbacks = (Callbacks) context;
+        mActivityItemStateListener = (ActivityItemStateListener) context;
         mContext = context;
         mGroups = groups;
-        mInflater= (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
@@ -107,10 +105,9 @@ public class SpaceBodyExpandableListAdapter extends BaseExpandableListAdapter im
             convertView = inflater.inflate(R.layout.spacebody_group_item, null);
         }
 
-        if (isExpanded){
+        if (isExpanded) {
             //Изменяем что-нибудь, если текущая Group раскрыта
-        }
-        else{
+        } else {
             //Изменяем что-нибудь, если текущая Group скрыта
         }
 
@@ -127,10 +124,10 @@ public class SpaceBodyExpandableListAdapter extends BaseExpandableListAdapter im
 
         SpaceBody spaceBody = mGroups.get(groupPosition).get(childPosition);
         ViewHolder holder;
-        if(convertView == null) {
+        if (convertView == null) {
             convertView = mInflater.inflate(R.layout.spacebody_list_item, null, true);
-            holder  = getViewHolder(convertView);
-        } else{
+            holder = getViewHolder(convertView);
+        } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
@@ -146,8 +143,10 @@ public class SpaceBodyExpandableListAdapter extends BaseExpandableListAdapter im
         // fragment is attached to one) that an item has been selected.
         return true;
     }
+
     /**
      * Get viewHolder by tag or create new if it doesn't exist
+     *
      * @param convertView view of news topic
      * @return instance of viewHolder
      */
@@ -165,15 +164,16 @@ public class SpaceBodyExpandableListAdapter extends BaseExpandableListAdapter im
             int mCurrentGroupPosition = ExpandableListView.getPackedPositionGroup(id);
             int mCurrentPosition = ExpandableListView.getPackedPositionChild(id);
             return mGroups.get(mCurrentGroupPosition).get(mCurrentPosition);
-        };
+        }
+        ;
         return new SpaceBody();
     }
 
     @Override
     public void deleteItem(SpaceBody spaceBody) {
-        for (ArrayList<SpaceBody> group:mGroups){
+        for (ArrayList<SpaceBody> group : mGroups) {
             int i = group.indexOf(spaceBody);
-            if(i != -1){
+            if (i != -1) {
                 group.remove(i);
                 break;
             }
@@ -196,19 +196,30 @@ public class SpaceBodyExpandableListAdapter extends BaseExpandableListAdapter im
 
     }
 
-
-    /**
-     * implementation of ViewHolder pattern for SpaceBodyListAdapter
-     */
-    static class ViewHolder {
-        public TextView titleView;
+    public int getItemPosition(SpaceBody item) {
+        for (ArrayList<SpaceBody> group : mGroups) {
+            int i = group.indexOf(item);
+            if (i != -1) {
+                int groupIndex = mGroups.indexOf(group);
+                return mOffset[groupIndex] + i;
+            }
+        }
+        return -1;
     }
+
     public int[] getOffset() {
         return mOffset;
     }
 
     public void setOffset(int[] offset) {
         mOffset = offset;
+    }
+
+    /**
+     * implementation of ViewHolder pattern for SpaceBodyListAdapter
+     */
+    static class ViewHolder {
+        public TextView titleView;
     }
 
 }

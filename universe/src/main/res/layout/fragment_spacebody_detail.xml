@@ -1,30 +1,32 @@
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".spaceBodyDetailActivity">
+
     <WebView
+        android:id="@+id/spacebody_detail"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/spacebody_detail"
-        tools:ignore="MergeRootFrame"/>
+        tools:ignore="MergeRootFrame" />
+
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/imgtop"
-        android:src="@drawable/blink"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        tools:ignore="MergeRootFrame"/>
-    <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/imgFavorite"
-        android:src="@drawable/drawable_list_item_bg"
-        tools:ignore="MergeRootFrame"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"/>
+        android:layout_alignParentTop="true"
+        android:src="@drawable/blink"
+        tools:ignore="MergeRootFrame" />
+
+    <ImageView
+        android:id="@+id/imgFavorite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:src="@drawable/star_list_drawable"
+        tools:ignore="MergeRootFrame" />
 
 </RelativeLayout>
 

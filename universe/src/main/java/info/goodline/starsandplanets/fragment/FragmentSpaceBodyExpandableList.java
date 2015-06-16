@@ -1,4 +1,4 @@
-package info.goodline.starsandplanets.fragments;
+package info.goodline.starsandplanets.fragment;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -7,56 +7,60 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import info.goodline.starsandplanets.R;
-import info.goodline.starsandplanets.activity.ListStateChangeListener;
 import info.goodline.starsandplanets.adapter.SpaceBodyExpandableListAdapter;
 import info.goodline.starsandplanets.data.SpaceBody;
+import info.goodline.starsandplanets.listener.ActivityItemStateListener;
+import info.goodline.starsandplanets.listener.FragmentListStateChangeListener;
 
 /**
  * A list fragment representing a list of spaceBodies. This fragment
  * also supports tablet devices by allowing list items to be given an
  * 'activated' state upon selection. This helps indicate which item is
  * currently being viewed in a {@link FragmentSpaceBodyDetail}.
- * <p>
- * Activities containing this fragment MUST implement the {@link Callbacks}
+ * <p/>
+ * Activities containing this fragment MUST implement the {@link ActivityItemStateListener}
  * interface.
  */
-public class FragmentSpaceBodyExpandableList extends BaseFragment implements ListStateChangeListener, ExpandableListView.OnChildClickListener {
+public class FragmentSpaceBodyExpandableList extends BaseFragment implements FragmentListStateChangeListener, ExpandableListView.OnChildClickListener {
 
     /**
      * The serialization (saved instance state) Bundle key representing the
      * activated item position. Only used on landscape orientation.
      */
     private static final String STATE_ACTIVATED_POSITION = "activated_position";
+    /**
+     * A implementation of the {@link ActivityItemStateListener} interface that does
+     * nothing. Used only when this fragment is not attached to an activity.
+     */
+    private static ActivityItemStateListener sActivityItemStateListener = new ActivityItemStateListener() {
+        @Override
+        public void onItemSelected(int id) {
+        }
 
+        @Override
+        public void changeStateFavoriteItem(SpaceBody favoriteSpaceBody, boolean isChecked) {
+
+        }
+
+        @Override
+        public void deleteFromOtherList(SpaceBody id) {
+
+        }
+    };
     /**
      * The fragment's current callback object, which is notified of list item
      * clicks.
      */
-    private Callbacks mCallbacks = sDummyCallbacks;
-
+    private ActivityItemStateListener mActivityItemStateListener = sActivityItemStateListener;
     /**
      * The current activated item position. Only used on landscape orientation.
      */
     private int mActivatedPosition = ListView.INVALID_POSITION;
     private SpaceBodyExpandableListAdapter mAdapter;
     private ExpandableListView mExpandableView;
-
-    /**
-     * A dummy implementation of the {@link Callbacks} interface that does
-     * nothing. Used only when this fragment is not attached to an activity.
-     */
-    private static Callbacks sDummyCallbacks = new Callbacks() {
-        @Override
-        public void onItemSelected(int id) {
-        }
-
-        @Override
-        public void sendFavoriteSpaceBody(SpaceBody favoriteSpaceBody) {
-
-        }
-    };
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -73,6 +77,7 @@ public class FragmentSpaceBodyExpandableList extends BaseFragment implements Lis
         // TODO: replace with a real list adapter.
 
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_spacebody_expandable_list, null);
@@ -80,7 +85,7 @@ public class FragmentSpaceBodyExpandableList extends BaseFragment implements Lis
         mExpandableView.setAdapter(mAdapter);
         mExpandableView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         mExpandableView.setOnChildClickListener(this);
-        super.mChildListView =mExpandableView;
+        super.mChildListView = mExpandableView;
         // Restore the previously serialized activated item position.
         if (savedInstanceState != null
                 && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
@@ -95,20 +100,19 @@ public class FragmentSpaceBodyExpandableList extends BaseFragment implements Lis
         super.onAttach(activity);
 
         // Activities containing this fragment must implement its callbacks.
-        if (!(activity instanceof Callbacks)) {
+        if (!(activity instanceof ActivityItemStateListener)) {
             throw new IllegalStateException("Activity must implement fragment's callbacks.");
         }
 
-        mCallbacks = (Callbacks) activity;
+        mActivityItemStateListener = (ActivityItemStateListener) activity;
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         // Reset the active callbacks interface to the dummy implementation.
-        mCallbacks = sDummyCallbacks;
+        mActivityItemStateListener = sActivityItemStateListener;
     }
-
 
 
     @Override
@@ -141,6 +145,7 @@ public class FragmentSpaceBodyExpandableList extends BaseFragment implements Lis
 
         mActivatedPosition = position;
     }
+
     /**
      * Switch visibility of listview when activity's spinner change item
      */
@@ -150,8 +155,13 @@ public class FragmentSpaceBodyExpandableList extends BaseFragment implements Lis
     }
 
     @Override
-    public void setCurrentItem(int position) {
-        mExpandableView.setItemChecked(position, true);
+    public void setCurrentItem(int position, SpaceBody item) {
+        int itemPosition = mAdapter.getItemPosition(item);
+        if (itemPosition != -1) {
+            mExpandableView.setItemChecked(itemPosition, true);
+        } else {
+            Toast.makeText(getActivity(), R.string.bad_index, Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -160,13 +170,14 @@ public class FragmentSpaceBodyExpandableList extends BaseFragment implements Lis
     }
 
     @Override
-    public void sendFavoriteState(SpaceBody favoriteSpaceBody) {
-        mCallbacks.sendFavoriteSpaceBody(favoriteSpaceBody);
+    public void changeStateFavoriteItem(SpaceBody favoriteSpaceBody, boolean isChecked) {
+        mActivityItemStateListener.changeStateFavoriteItem(favoriteSpaceBody, isChecked);
     }
+
 
     @Override
     public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-        mCallbacks.onItemSelected(mAdapter.getOffset()[groupPosition]+childPosition);
+        mActivityItemStateListener.onItemSelected(mAdapter.getOffset()[groupPosition] + childPosition);
         return false;
     }
 }

@@ -1,52 +1,55 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              tools:context=".spaceBodyListActivity">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".spaceBodyListActivity">
 
 
-        <android.support.v7.widget.Toolbar
-        android:layout_height="60dp"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-            android:id="@+id/toolbar">
-            <Spinner
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/spinnerList"/>
-        </android.support.v7.widget.Toolbar>
+        android:layout_height="60dp">
 
+        <Spinner
+            android:id="@+id/spinnerList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </android.support.v7.widget.Toolbar>
 
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:baselineAligned="false"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
         android:divider="?android:attr/dividerHorizontal"
+        android:orientation="horizontal"
         android:showDividers="middle">
+
         <fragment
             android:id="@+id/spacebody_list"
-            android:name="info.goodline.starsandplanets.fragments.FragmentSpaceBodyList"
+            android:name="info.goodline.starsandplanets.fragment.FragmentSpaceBodyList"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="2"
-            tools:layout="@android:layout/list_content"/>
+            tools:layout="@android:layout/list_content" />
+
         <fragment
             android:id="@+id/spacebody_expandable_list"
-            android:name="info.goodline.starsandplanets.fragments.FragmentSpaceBodyExpandableList"
-            android:visibility="gone"
+            android:name="info.goodline.starsandplanets.fragment.FragmentSpaceBodyExpandableList"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="2"
-            tools:layout="@android:layout/expandable_list_content"/>
+            android:visibility="gone"
+            tools:layout="@android:layout/expandable_list_content" />
+
         <android.support.v4.view.ViewPager
             android:id="@+id/spacebody_detail_viewpager"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="4"/>
+            android:layout_weight="4" />
     </LinearLayout>
 
 

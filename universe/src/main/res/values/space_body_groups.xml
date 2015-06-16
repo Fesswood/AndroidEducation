@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <array
-        name="space_body_group_name">
+    <array name="space_body_group_name">
         <item>Galaxies</item>
         <item>Nebula</item>
         <item>Stars</item>
