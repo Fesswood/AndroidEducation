@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">ArticleView</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="serach_text">search...</string>
+    <string name="search_hint">type smth to search</string>
+    <string name="add_new_article">Add New Article</string>
+    <string name="view_article">View</string>
+    <string name="edit_article">Edit</string>
+    <string name="need_published">need publish?</string>
+    <string name="published">publish</string>
+    <string name="save">Save Article</string>
+</resources>

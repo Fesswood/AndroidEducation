@@ -20,6 +20,8 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:layout_alignParentLeft="true"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
             android:src="@drawable/blink" />
 
         <TextView
@@ -28,7 +30,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:textAppearance="?android:textAppearanceLarge"
             android:textColor="@color/abc_primary_text_material_light"
             android:textSize="15dp"
             tools:text="News Title" />

@@ -82,7 +82,7 @@ public class BaseFragment extends Fragment implements AdapterView.OnItemLongClic
 
     private void attachClickListeners() {
         if (mChildListView != null) {
-            mChildListView.setOnItemLongClickListener(this);
+            mChildListView.setOnItemLongClickListener(null);
         } else {
             throw new IllegalArgumentException("mChildListView is null!");
         }

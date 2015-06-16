@@ -1,1 +1,1 @@
-include ':app', ':imageswapper', ':funnycounters', ':universe'
+include ':app', ':imageswapper', ':funnycounters', ':universe', ':articleview'

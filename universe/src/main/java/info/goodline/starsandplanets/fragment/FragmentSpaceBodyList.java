@@ -143,9 +143,9 @@ public class FragmentSpaceBodyList extends BaseFragment implements FragmentListS
     public void setActivateOnItemClick(boolean activateOnItemClick) {
         // When setting CHOICE_MODE_SINGLE, ListView will automatically
         // give items the 'activated' state when touched.
-        mListView.setChoiceMode(activateOnItemClick
-                ? ListView.CHOICE_MODE_SINGLE
-                : ListView.CHOICE_MODE_NONE);
+        //mListView.setChoiceMode(activateOnItemClick
+        //        ? ListView.CHOICE_MODE_SINGLE
+       //         : ListView.CHOICE_MODE_NONE);
     }
 
     private void setActivatedPosition(int position) {

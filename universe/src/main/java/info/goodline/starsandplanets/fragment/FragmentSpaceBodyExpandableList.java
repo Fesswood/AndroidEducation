@@ -156,9 +156,9 @@ public class FragmentSpaceBodyExpandableList extends BaseFragment implements Fra
 
     @Override
     public void setCurrentItem(int position, SpaceBody item) {
-        int itemPosition = mAdapter.getItemPosition(item);
-        if (itemPosition != -1) {
-            mExpandableView.setItemChecked(itemPosition, true);
+        int[] itemPosition = mAdapter.getItemPosition(item);
+        if (itemPosition != null) {
+            mExpandableView.setSelectedChild(itemPosition[1],itemPosition[0],true);
         } else {
             Toast.makeText(getActivity(), R.string.bad_index, Toast.LENGTH_SHORT).show();
         }

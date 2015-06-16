@@ -196,15 +196,15 @@ public class SpaceBodyExpandableListAdapter extends BaseExpandableListAdapter im
 
     }
 
-    public int getItemPosition(SpaceBody item) {
+    public int[] getItemPosition(SpaceBody item) {
         for (ArrayList<SpaceBody> group : mGroups) {
             int i = group.indexOf(item);
             if (i != -1) {
                 int groupIndex = mGroups.indexOf(group);
-                return mOffset[groupIndex] + i;
+                return new int[]{mOffset[groupIndex],groupIndex};
             }
         }
-        return -1;
+        return null;
     }
 
     public int[] getOffset() {
