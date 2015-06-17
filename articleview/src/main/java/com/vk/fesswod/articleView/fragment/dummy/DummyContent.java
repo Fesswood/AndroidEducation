@@ -5,8 +5,10 @@ import com.vk.fesswod.articleView.data.ArticleGroup;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Helper class for providing sample content for user interfaces created by
@@ -25,9 +27,14 @@ public class DummyContent {
      * A map of sample (dummy) items, by ID.
      */
     public static Map<String, Article> ITEM_MAP = new HashMap<String, Article>();
+    /**
+     * A map of sample (dummy) items, by ID.
+     */
+    public static HashSet<String> GROUP_SET = new  HashSet<String>();
+
 
     static {
-        // Add 3 sample items.
+        // Add 3 or little bit more sample items.
         addItem(new Article("Test","Desc",new ArticleGroup("Group1"), 13l));
         addItem(new Article("Test1","Desc",new ArticleGroup("Group2"), 12l));
         addItem(new Article("Test2","Desc",new ArticleGroup("Group3"), 11l));
@@ -46,6 +53,7 @@ public class DummyContent {
     private static void addItem(Article item) {
         ITEMS.add(item);
         ITEM_MAP.put(item.getTitle(), item);
+        GROUP_SET.add(item.getArticleGroup().getTitle());
     }
 
 

@@ -18,6 +18,11 @@ public class MainActivity extends BaseActivity implements FragmentArticleList.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        FragmentArticleList listfragment = (FragmentArticleList) getSupportFragmentManager()
+                .findFragmentById(R.id.list_article_fragment);
+        FragmentArticleDetail expListFragment = ((FragmentArticleDetail) getSupportFragmentManager()
+                .findFragmentById(R.id.article_fragment));
     }
 
     @Override

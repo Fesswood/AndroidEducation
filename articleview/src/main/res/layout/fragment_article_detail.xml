@@ -106,7 +106,7 @@
                 <android.support.design.widget.FloatingActionButton
                     app:fabSize="mini"
 
-                    android:id="@+id/FloatingButtonAddImage"
+                    android:id="@+id/floatingButtonAddImage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_plus_sign"
