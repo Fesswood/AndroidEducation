@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="match_parent"
+              android:paddingTop="20dp">
 
     <Spinner
         android:layout_width="wrap_content"
@@ -21,7 +22,7 @@
             android:layout_height="match_parent"
             android:id="@+id/imageButtonRefreshSearch"
             android:background="@color/primary_dark"
-            android:src="@drawable/delete"
+            android:src="@android:drawable/stat_notify_sync"
             android:layout_margin="4dp"
             />
 

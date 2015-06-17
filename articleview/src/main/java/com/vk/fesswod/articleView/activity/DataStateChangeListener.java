@@ -1,5 +1,7 @@
 package com.vk.fesswod.articleView.activity;
 
+import android.net.Uri;
+
 import com.vk.fesswod.articleView.data.Article;
 
 /**
@@ -8,5 +10,5 @@ import com.vk.fesswod.articleView.data.Article;
 public interface DataStateChangeListener {
     boolean delete(long id);
     boolean update(Article article);
-    Article create(Article article);
+    Uri insert(Article article);
 }

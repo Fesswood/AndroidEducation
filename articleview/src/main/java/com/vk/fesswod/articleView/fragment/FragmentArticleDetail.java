@@ -11,6 +11,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,9 +22,12 @@ import android.widget.Switch;
 
 import com.vk.fesswod.articleView.R;
 import com.vk.fesswod.articleView.data.Article;
+import com.vk.fesswod.articleView.data.ArticleGroup;
 import com.vk.fesswod.articleView.fragment.dummy.DummyContent;
 
 import java.io.IOException;
+import java.security.acl.Group;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -36,7 +40,7 @@ import java.util.HashSet;
  * Use the {@link FragmentArticleDetail#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FragmentArticleDetail extends BaseFragment implements FragmentArticleDisplayListener, View.OnClickListener {
+public class FragmentArticleDetail extends BaseFragment implements FragmentArticleDisplayListener, View.OnClickListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -50,15 +54,16 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
     private FragmentArticleList.FragmentInteractionListener mListener;
     private EditText mNameEditText;
     private EditText mDescEditText;
-    private Spinner mGroupSpinner;
-    private Switch mPublishSwitch;
+    private Spinner  mGroupSpinner;
+    private Switch   mPublishSwitch;
     private ImageView mArticleImageView;
     private FloatingActionButton mAddImageFloatingActionButton;
     private Button mSaveButton;
     private Button mEditArticleButton;
     private Button mViewArticleButton;
     private LinearLayout mControlslayout;
-    private Article mCurrentArticle;
+    private boolean isMyOwn;
+    private Article mArticle;
 
     /**
      * Use this factory method to create a new instance of
@@ -133,7 +138,7 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
 
     @Override
     public void displayArticle(Article article) {
-        mCurrentArticle = article;
+        mArticle=article;
         mNameEditText.setText(article.getTitle());
         mDescEditText.setText(article.getDesc());
         initGroupSpinner();
@@ -141,12 +146,13 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
     }
 
     private void initGroupSpinner() {
-        ArrayAdapter<String> adapter;
-        HashSet<String> list = DummyContent.GROUP_SET;
-        adapter = new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_spinner_item, new ArrayList<String>(list));
+        ArrayAdapter<ArticleGroup> adapter;
+        ArrayList<ArticleGroup> list = new ArrayList<>(DummyContent.GROUP_SET) ;
+        adapter = new ArrayAdapter<ArticleGroup>(getActivity(),
+                android.R.layout.simple_spinner_item, list );
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mGroupSpinner.setAdapter(adapter);
+        mGroupSpinner.setSelection(list.indexOf(mArticle.getArticleGroup()));
     }
 
     @Override
@@ -162,20 +168,47 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
                 showImageGallery();
                 break;
             case R.id.buttonSaveArticle:
-                mListener.onFragmentInteraction(mCurrentArticle,this.getId());
+
+                saveArticle();
                 break;
         }
     }
 
-    private void ChangeControlEnable(boolean isEnable) {
-        for (int i = 0; i < mControlslayout.getChildCount(); i++) {
-            View child = mControlslayout.getChildAt(i);
-            child.setEnabled(isEnable);
-        }
-        mSaveButton.setVisibility(
-                isEnable? View.VISIBLE : View.INVISIBLE
-        );
+    private void saveArticle() {
+        mArticle.setTitle(mNameEditText.getText().toString());
+        mArticle.setDesc(mDescEditText.getText().toString());
+        ArticleGroup group =(ArticleGroup) mGroupSpinner.getSelectedItem();
+        mArticle.setArticleGroup(group);
+        mArticle.setIsMyOwn(isMyOwn);
+        mArticle.setUpdateAtTimeStamp(System.currentTimeMillis() / 1000L);
+        mListener.onFragmentInteraction(mArticle,this.getId());
+    }
 
+    private void ChangeControlEnable(boolean isEnabled) {
+        mNameEditText.setEnabled(isEnabled);
+        mDescEditText.setEnabled(isEnabled);
+        mGroupSpinner.setEnabled(isEnabled);
+        mPublishSwitch.setEnabled(isEnabled);
+        mArticleImageView.setEnabled(isEnabled);
+        if(isEnabled){
+            changeActiveButtons(true,
+                    getResources().getColor(R.color.primary),
+                    getResources().getColor(R.color.primary_dark),
+                    View.VISIBLE);
+        }else{
+            changeActiveButtons(false,
+                    getResources().getColor(R.color.primary_dark),
+                    getResources().getColor(R.color.primary),
+                    View.GONE);
+        }
+    }
+
+    private void changeActiveButtons(boolean isEnabled, int color, int color2, int visible) {
+        mViewArticleButton.setEnabled(isEnabled);
+        mViewArticleButton.setBackgroundColor(color);
+        mEditArticleButton.setEnabled(!isEnabled);
+        mEditArticleButton.setBackgroundColor(color2);
+        mSaveButton.setVisibility(visible);
     }
 
     private void showImageGallery() {
@@ -184,7 +217,7 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         // Always show the chooser (if there are multiple options available)
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"),  PICK_IMAGE_REQUEST);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
     }
 
     @Override
@@ -199,11 +232,13 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
                 // Log.d(TAG, String.valueOf(bitmap));
                 mArticleImageView.setImageBitmap(bitmap);
+                mArticle.setImageUri(getPath(getActivity(), uri));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated

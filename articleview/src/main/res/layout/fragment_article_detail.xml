@@ -96,7 +96,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:padding="10dp">
+                android:paddingLeft="10dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp">
 
                 <ImageView
                     android:layout_width="match_parent"
@@ -113,10 +115,12 @@
                     android:id="@+id/floatingButtonAddImage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_plus_sign"
+                    android:src="@drawable/icons"
                     app:elevation="4dp"
                     app:borderWidth="0dp"
-                    />
+                    android:layout_alignTop="@+id/imageViewThumb"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"/>
             </RelativeLayout>
     </LinearLayout>
 

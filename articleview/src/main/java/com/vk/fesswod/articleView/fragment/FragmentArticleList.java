@@ -3,6 +3,7 @@ package com.vk.fesswod.articleView.fragment;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +15,7 @@ import android.widget.Spinner;
 
 
 import com.vk.fesswod.articleView.R;
-import com.vk.fesswod.articleView.adapter.AdapterListArticle;
+import com.vk.fesswod.articleView.adapter.SimpleCursorAdapterListArticle;
 import com.vk.fesswod.articleView.data.Article;
 import com.vk.fesswod.articleView.fragment.dummy.DummyContent;
 
@@ -27,12 +28,13 @@ import java.util.ArrayList;
  * Activities containing this fragment MUST implement the {@link FragmentInteractionListener}
  * interface.
  */
-public class FragmentArticleList extends BaseFragment implements  AdapterView.OnItemClickListener {
+public class FragmentArticleList extends BaseFragment implements  AdapterView.OnItemClickListener , FragmentListDisplayListener{
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String DEBUG_TAG = FragmentArticleList.class.getSimpleName();
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -71,7 +73,7 @@ public class FragmentArticleList extends BaseFragment implements  AdapterView.On
         }
 
         // TODO: Change Adapter to display your content
-        mAdapter= new AdapterListArticle(getActivity(), DummyContent.ITEMS);
+        mAdapter= new SimpleCursorAdapterListArticle(getActivity(), DummyContent.ITEMS);
     }
 
     @Nullable
@@ -120,6 +122,11 @@ public class FragmentArticleList extends BaseFragment implements  AdapterView.On
                 android.R.layout.simple_spinner_item, list);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mListTypeSpinner.setAdapter(adapter);
+    }
+
+    @Override
+    public void updateListWithItem(Article article) {
+        Log.d(DEBUG_TAG,"article received"+ article);
     }
 
     /**

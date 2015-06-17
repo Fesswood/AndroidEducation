@@ -9,19 +9,22 @@ import com.vk.fesswod.articleView.R;
 import com.vk.fesswod.articleView.data.Article;
 import com.vk.fesswod.articleView.fragment.FragmentArticleDisplayListener;
 import com.vk.fesswod.articleView.fragment.FragmentArticleList;
+import com.vk.fesswod.articleView.fragment.FragmentListDisplayListener;
 
 
 public class MainActivity extends BaseActivity implements FragmentArticleList.FragmentInteractionListener {
 
     private FragmentArticleDisplayListener mArticleDisplayListener;
+    private FragmentListDisplayListener mListDisplayLister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-         mArticleDisplayListener = ((FragmentArticleDisplayListener) getSupportFragmentManager()
-                .findFragmentById(R.id.article_fragment));
+        mListDisplayLister = (FragmentListDisplayListener) getSupportFragmentManager()
+                .findFragmentById(R.id.list_article_fragment);
+         mArticleDisplayListener = (FragmentArticleDisplayListener) getSupportFragmentManager()
+                .findFragmentById(R.id.article_fragment);
     }
 
     @Override
@@ -53,6 +56,7 @@ public class MainActivity extends BaseActivity implements FragmentArticleList.Fr
                 mArticleDisplayListener.displayArticle(article);
                 break;
             case R.id.article_fragment:
+                mListDisplayLister.updateListWithItem(article);
                 break;
         }
     }
