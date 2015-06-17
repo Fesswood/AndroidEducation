@@ -2,14 +2,15 @@ package com.vk.fesswod.articleView.fragment;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.app.ListFragment;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ExpandableListView;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 
 import com.vk.fesswod.articleView.R;
@@ -17,11 +18,13 @@ import com.vk.fesswod.articleView.adapter.AdapterListArticle;
 import com.vk.fesswod.articleView.data.Article;
 import com.vk.fesswod.articleView.fragment.dummy.DummyContent;
 
+import java.util.ArrayList;
+
 /**
  * A fragment representing a list of Items.
  * <p>
  * <p>
- * Activities containing this fragment MUST implement the {@link OnFragmentInteractionListener}
+ * Activities containing this fragment MUST implement the {@link FragmentInteractionListener}
  * interface.
  */
 public class FragmentArticleList extends BaseFragment implements  AdapterView.OnItemClickListener {
@@ -36,8 +39,10 @@ public class FragmentArticleList extends BaseFragment implements  AdapterView.On
     private String mParam2;
 
     private ListView mListView;
-    private OnFragmentInteractionListener mListener;
+    private ExpandableListView mExpListView;
+    private FragmentInteractionListener mListener;
     private ArrayAdapter<Article> mAdapter;
+    private Spinner mListTypeSpinner;
 
     // TODO: Rename and change types of parameters
     public static FragmentArticleList newInstance(String param1, String param2) {
@@ -76,6 +81,8 @@ public class FragmentArticleList extends BaseFragment implements  AdapterView.On
         mListView = (ListView) v.findViewById(R.id.listViewArticleTitle);
         mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(this);
+        mListTypeSpinner = (Spinner) v.findViewById(R.id.spinnerChangeListType);
+        initListTypeSpinner();
         return v;
     }
 
@@ -83,10 +90,10 @@ public class FragmentArticleList extends BaseFragment implements  AdapterView.On
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mListener = (OnFragmentInteractionListener) activity;
+            mListener = (FragmentInteractionListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement FragmentInteractionListener");
         }
     }
 
@@ -100,10 +107,20 @@ public class FragmentArticleList extends BaseFragment implements  AdapterView.On
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(DummyContent.ITEMS.get(position));
+            mListener.onFragmentInteraction(DummyContent.ITEMS.get(position),this.getId());
         }
     }
 
+    private void initListTypeSpinner() {
+        ArrayAdapter<String> adapter;
+        ArrayList<String> list = new ArrayList<>();
+        list.add( getActivity().getResources().getString(R.string.expandable_list));
+        list.add( getActivity().getResources().getString(R.string.simple_list));
+        adapter = new ArrayAdapter<String>(getActivity(),
+                android.R.layout.simple_spinner_item, list);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mListTypeSpinner.setAdapter(adapter);
+    }
 
     /**
      * This interface must be implemented by activities that contain this
@@ -115,9 +132,9 @@ public class FragmentArticleList extends BaseFragment implements  AdapterView.On
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener {
+    public interface FragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(Article id);
+        public void onFragmentInteraction(Article id, int fragmentId);
     }
 
 }

@@ -1,27 +1,26 @@
 package com.vk.fesswod.articleView.activity;
 
 import android.net.Uri;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.vk.fesswod.articleView.R;
 import com.vk.fesswod.articleView.data.Article;
-import com.vk.fesswod.articleView.fragment.FragmentArticleDetail;
+import com.vk.fesswod.articleView.fragment.FragmentArticleDisplayListener;
 import com.vk.fesswod.articleView.fragment.FragmentArticleList;
 
 
-public class MainActivity extends BaseActivity implements FragmentArticleList.OnFragmentInteractionListener,FragmentArticleDetail.FragmentArticleStateListener {
+public class MainActivity extends BaseActivity implements FragmentArticleList.FragmentInteractionListener {
+
+    private FragmentArticleDisplayListener mArticleDisplayListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FragmentArticleList listfragment = (FragmentArticleList) getSupportFragmentManager()
-                .findFragmentById(R.id.list_article_fragment);
-        FragmentArticleDetail expListFragment = ((FragmentArticleDetail) getSupportFragmentManager()
+         mArticleDisplayListener = ((FragmentArticleDisplayListener) getSupportFragmentManager()
                 .findFragmentById(R.id.article_fragment));
     }
 
@@ -48,12 +47,14 @@ public class MainActivity extends BaseActivity implements FragmentArticleList.On
     }
 
     @Override
-    public void onFragmentInteraction(Article article) {
-
+    public void onFragmentInteraction(Article article, int fragmentId) {
+        switch (fragmentId){
+            case R.id.list_article_fragment:
+                mArticleDisplayListener.displayArticle(article);
+                break;
+            case R.id.article_fragment:
+                break;
+        }
     }
 
-    @Override
-    public void onArticleChangesListener(Uri uri) {
-
-    }
 }

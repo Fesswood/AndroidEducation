@@ -54,6 +54,7 @@ public class DummyContent {
         ITEMS.add(item);
         ITEM_MAP.put(item.getTitle(), item);
         GROUP_SET.add(item.getArticleGroup().getTitle());
+
     }
 
 

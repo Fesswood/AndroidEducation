@@ -14,4 +14,6 @@
     <string name="need_published">need publish?</string>
     <string name="published">publish</string>
     <string name="save">Save Article</string>
+    <string name="expandable_list">Show Groups</string>
+    <string name="simple_list">Hide Groups</string>
 </resources>
