@@ -96,7 +96,7 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_article_detail, null);
         mEditArticleButton = (Button) v.findViewById(R.id.buttonEdit);
-        mViewArticleButton = (Button) v.findViewById(R.id.buttonEdit);
+        mViewArticleButton = (Button) v.findViewById(R.id.buttonView);
         mControlslayout = (LinearLayout) v.findViewById(R.id.LinearLayout_editLayout);
         mNameEditText = (EditText) v.findViewById(R.id.editTextArticleName);
         mDescEditText = (EditText) v.findViewById(R.id.editTextArticleContent);
