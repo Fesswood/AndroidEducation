@@ -8,14 +8,19 @@ import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.*;
  */
 public class Article {
     long id;
+    private long server_id;
     String title;
     String desc;
     boolean isPublished;
     boolean isMyOwn;
-    ArticleGroup mArticleGroup;
+    long mArticleGroupId;
     String mImageUri;
     long createAtTimeStamp;
     long updateAtTimeStamp;
+
+    public Article(String title, String desc){
+        this(title,desc,true,-1,System.currentTimeMillis()/1000l);
+    }
 
     public Article(String title, String desc, boolean isMyOwn, int articleGroupId, long createAtTimeStamp) {
         this(-1, title, desc, false,isMyOwn,"", articleGroupId, createAtTimeStamp, -1l);
@@ -28,7 +33,8 @@ public class Article {
         this.desc = desc;
         this.isPublished = isPublished;
         this.isMyOwn = isMyOwn;
-        this.mArticleGroup = Article.getCurrentGroup(articleGroupId);
+        this.mImageUri=ImageUrl;
+        this.mArticleGroupId = articleGroupId;
         this.createAtTimeStamp = createAtTimeStamp;
         this.updateAtTimeStamp = updateAtTimeStamp;
     }
@@ -47,7 +53,7 @@ public class Article {
         cv.put(ARTICLES_COLUMN_DESC, desc);
         cv.put(ARTICLES_COLUMN_IS_PUBLISHED, isPublished ? 1 : 0);
         cv.put(ARTICLES_COLUMN_IS_MYOWN, isMyOwn?1:0);
-        cv.put(ARTICLES_COLUMN_GROUP_ID, mArticleGroup.getId());
+        cv.put(ARTICLES_COLUMN_GROUP_ID, mArticleGroupId);
         cv.put(ARTICLES_COLUMN_IMAGE_URL, mImageUri);
         cv.put(ARTICLES_COLUMN_UPDATED_AT, updateAtTimeStamp);
         cv.put(ARTICLES_COLUMN_CREATED_AT, createAtTimeStamp);
@@ -88,8 +94,16 @@ public class Article {
     public String toString() {
         return super.toString()+" title:"+title+
                                 " desc:"+desc+
-                                " mArticleGroup:"+mArticleGroup.getTitle()+
+                                " mArticleGroupId:"+ mArticleGroupId+
                                 "  isPublished:"+isPublished;
+    }
+
+    public static class ArticleContainer{
+        public Article[] articles;
+
+        public ArticleContainer(Article[] articles) {
+            this.articles = articles;
+        }
     }
 
     public long getId() {
@@ -124,12 +138,12 @@ public class Article {
         this.isPublished = isPublished;
     }
 
-    public ArticleGroup getArticleGroup() {
-        return mArticleGroup;
+    public long getArticleGroupId() {
+        return mArticleGroupId;
     }
 
-    public void setArticleGroup(ArticleGroup articleGroup) {
-        this.mArticleGroup = articleGroup;
+    public void setArticleGroupId(long articleGroupId) {
+        this.mArticleGroupId = articleGroupId;
     }
 
     public long getCreateAtTimeStamp() {
@@ -162,5 +176,13 @@ public class Article {
 
     public void setImageUri(String imageUri) {
         mImageUri = imageUri;
+    }
+
+    public long getServer_id() {
+        return server_id;
+    }
+
+    public void setServer_id(long server_id) {
+        this.server_id = server_id;
     }
 }

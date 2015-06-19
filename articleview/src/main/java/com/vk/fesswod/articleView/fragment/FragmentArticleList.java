@@ -1,6 +1,9 @@
 package com.vk.fesswod.articleView.fragment;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -9,15 +12,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
 import android.widget.Spinner;
 
-
 import com.vk.fesswod.articleView.R;
+import com.vk.fesswod.articleView.activity.DataStateChangeListener;
 import com.vk.fesswod.articleView.adapter.SimpleCursorAdapterListArticle;
+import com.vk.fesswod.articleView.data.AppContentProvider;
 import com.vk.fesswod.articleView.data.Article;
-import com.vk.fesswod.articleView.fragment.dummy.DummyContent;
 
 import java.util.ArrayList;
 
@@ -28,7 +32,7 @@ import java.util.ArrayList;
  * Activities containing this fragment MUST implement the {@link FragmentInteractionListener}
  * interface.
  */
-public class FragmentArticleList extends BaseFragment implements  AdapterView.OnItemClickListener , FragmentListDisplayListener{
+public class FragmentArticleList extends BaseFragment implements  SimpleCursorAdapterListArticle.ListItemDeleteListener, AdapterView.OnItemClickListener , FragmentListDisplayListener, View.OnClickListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -43,8 +47,10 @@ public class FragmentArticleList extends BaseFragment implements  AdapterView.On
     private ListView mListView;
     private ExpandableListView mExpListView;
     private FragmentInteractionListener mListener;
-    private ArrayAdapter<Article> mAdapter;
+    private DataStateChangeListener mDataListener;
+    private SimpleCursorAdapterListArticle mAdapter;
     private Spinner mListTypeSpinner;
+    private Button mButtonAddarticle;
 
     // TODO: Rename and change types of parameters
     public static FragmentArticleList newInstance(String param1, String param2) {
@@ -71,9 +77,10 @@ public class FragmentArticleList extends BaseFragment implements  AdapterView.On
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+            sendRequestGetArticles();
 
         // TODO: Change Adapter to display your content
-        mAdapter= new SimpleCursorAdapterListArticle(getActivity(), DummyContent.ITEMS);
+
     }
 
     @Nullable
@@ -81,9 +88,10 @@ public class FragmentArticleList extends BaseFragment implements  AdapterView.On
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_article_list, null);
         mListView = (ListView) v.findViewById(R.id.listViewArticleTitle);
-        mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(this);
+        mButtonAddarticle = (Button) v.findViewById(R.id.buttonAddNewArticle);
         mListTypeSpinner = (Spinner) v.findViewById(R.id.spinnerChangeListType);
+        mButtonAddarticle.setOnClickListener(this);
         initListTypeSpinner();
         return v;
     }
@@ -93,6 +101,7 @@ public class FragmentArticleList extends BaseFragment implements  AdapterView.On
         super.onAttach(activity);
         try {
             mListener = (FragmentInteractionListener) activity;
+            mDataListener = (DataStateChangeListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement FragmentInteractionListener");
@@ -109,7 +118,7 @@ public class FragmentArticleList extends BaseFragment implements  AdapterView.On
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(DummyContent.ITEMS.get(position),this.getId());
+            mListener.onFragmentInteraction(id,this.getId());
         }
     }
 
@@ -125,9 +134,35 @@ public class FragmentArticleList extends BaseFragment implements  AdapterView.On
     }
 
     @Override
-    public void updateListWithItem(Article article) {
+    public void updateListWithItem(long article) {
         Log.d(DEBUG_TAG,"article received"+ article);
     }
+
+    @Override
+    public void setAdapter(SimpleCursorAdapterListArticle adapter) {
+        mAdapter=adapter;
+        mListView.setAdapter(mAdapter);
+        mAdapter.setOnDeleteListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        showSnackbar(R.string.snackbar_new_article, R.string.scnakbar_ok, null);
+        mListener.onFragmentInteraction(-1, FragmentArticleList.this.getId());
+    }
+
+    @Override
+    void receiveArticlesCallback(Article.ArticleContainer articleContainer) {
+        for (int i=0; i<articleContainer.articles.length;i++){
+            mDataListener.insert(articleContainer.articles[i]);
+        }
+    }
+
+    @Override
+    protected void showSnackbar(int stringResource, int scnakbarActionString, View.OnClickListener listener) {
+        mListener.showSnackBar(stringResource, scnakbarActionString, listener);
+    }
+
 
     /**
      * This interface must be implemented by activities that contain this
@@ -141,7 +176,41 @@ public class FragmentArticleList extends BaseFragment implements  AdapterView.On
      */
     public interface FragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(Article id, int fragmentId);
+        public void onFragmentInteraction(long id, int fragmentId);
+        void showSnackBar(int stringResource, int scnakbarActionString, View.OnClickListener listener);
+    }
+    /**
+     * CallBack from Adapter, when user click to delete button
+     * @param v
+     */
+    @Override
+    public void deleteArticle(final View v) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        // Add the buttons
+        builder.setMessage(R.string.dialog_message)
+                .setTitle(R.string.dialog_title);
+        builder.setPositiveButton(R.string.scnakbar_ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+
+                Object idWrapper =(Object) v.getTag();
+                sendRequestDeleteArticle(Long.parseLong((String) idWrapper));
+            }
+        });
+        builder.setNegativeButton(R.string.snackbar_cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+            }
+        });
+        // Set other dialog properties
+        // Create the AlertDialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
+    @Override
+    void receiveDeleteCallback(long id) {
+        Uri uri = Uri.parse(AppContentProvider.CONTENT_URI_ARTICLES + "/"
+                + id);
+        getActivity().getContentResolver().delete(uri, null, null);
+    }
 }

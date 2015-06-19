@@ -1,17 +1,17 @@
 package com.vk.fesswod.articleView.fragment;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,15 +21,27 @@ import android.widget.Spinner;
 import android.widget.Switch;
 
 import com.vk.fesswod.articleView.R;
+import com.vk.fesswod.articleView.activity.DataStateChangeListener;
+import com.vk.fesswod.articleView.data.AppContentProvider;
 import com.vk.fesswod.articleView.data.Article;
 import com.vk.fesswod.articleView.data.ArticleGroup;
-import com.vk.fesswod.articleView.fragment.dummy.DummyContent;
+
+import org.json.JSONException;
 
 import java.io.IOException;
-import java.security.acl.Group;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Arrays;
+import java.util.List;
+
+import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.ARTICLES_COLUMN_CREATED_AT;
+import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.ARTICLES_COLUMN_DESC;
+import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.ARTICLES_COLUMN_GROUP_ID;
+import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.ARTICLES_COLUMN_IMAGE_URL;
+import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.ARTICLES_COLUMN_IS_MYOWN;
+import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.ARTICLES_COLUMN_IS_PUBLISHED;
+import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.ARTICLES_COLUMN_TITLE;
+import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.ARTICLES_COLUMN_UPDATED_AT;
+import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.COLUMN_ID;
 
 
 /**
@@ -52,6 +64,7 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
     private String mParam2;
 
     private FragmentArticleList.FragmentInteractionListener mListener;
+    private DataStateChangeListener mDataStateListenr;
     private EditText mNameEditText;
     private EditText mDescEditText;
     private Spinner  mGroupSpinner;
@@ -62,8 +75,9 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
     private Button mEditArticleButton;
     private Button mViewArticleButton;
     private LinearLayout mControlslayout;
-    private boolean isMyOwn;
+    private boolean isMyOwn = true;
     private Article mArticle;
+    private boolean mIsNewArticle;
 
     /**
      * Use this factory method to create a new instance of
@@ -124,6 +138,7 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
         super.onAttach(activity);
         try {
             mListener = (FragmentArticleList.FragmentInteractionListener) activity;
+            mDataStateListenr = (DataStateChangeListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement FragmentInteractionListener");
@@ -137,23 +152,54 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
     }
 
     @Override
-    public void displayArticle(Article article) {
-        mArticle=article;
-        mNameEditText.setText(article.getTitle());
-        mDescEditText.setText(article.getDesc());
-        initGroupSpinner();
-        mPublishSwitch.setChecked(article.isPublished());
+    public void showArticle(long articleId) {
+
+        if(articleId != -1){
+            fillArticleFromDB(articleId);
+            mIsNewArticle=false;
+        }else {
+            mIsNewArticle=true;
+            mArticle=new Article("New Article","Please add content here!");
+        }
+        mNameEditText.setText(mArticle.getTitle());
+        mDescEditText.setText(mArticle.getDesc());
+        mPublishSwitch.setChecked(mArticle.isPublished());
+        if(!mArticle.isMyOwn()){
+            ChangeControlEnable(false);
+            mEditArticleButton.setVisibility(View.GONE);
+        }else {
+            ChangeControlEnable(true);
+            mEditArticleButton.setVisibility(View.VISIBLE);
+
+        }
+        fillGroups();
     }
 
-    private void initGroupSpinner() {
-        ArrayAdapter<ArticleGroup> adapter;
-        ArrayList<ArticleGroup> list = new ArrayList<>(DummyContent.GROUP_SET) ;
-        adapter = new ArrayAdapter<ArticleGroup>(getActivity(),
-                android.R.layout.simple_spinner_item, list );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mGroupSpinner.setAdapter(adapter);
-        mGroupSpinner.setSelection(list.indexOf(mArticle.getArticleGroup()));
+    private void fillArticleFromDB(long articleId) {
+        String[] projection = {
+                COLUMN_ID,
+                ARTICLES_COLUMN_TITLE ,
+                ARTICLES_COLUMN_DESC  ,
+                ARTICLES_COLUMN_IS_PUBLISHED,
+                ARTICLES_COLUMN_IS_MYOWN ,
+                ARTICLES_COLUMN_GROUP_ID,
+                ARTICLES_COLUMN_IMAGE_URL,
+                ARTICLES_COLUMN_UPDATED_AT,
+                ARTICLES_COLUMN_CREATED_AT
+        };
+        Cursor cursor = getActivity().getContentResolver().query(
+                AppContentProvider.CONTENT_URI_ARTICLES,
+                projection,
+                COLUMN_ID+" = ?",
+                new String[]{""+articleId},
+                null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+            mArticle= Article.fromCursor(cursor);
+        }
+        cursor.close();
     }
+
 
     @Override
     public void onClick(View v) {
@@ -178,10 +224,20 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
         mArticle.setTitle(mNameEditText.getText().toString());
         mArticle.setDesc(mDescEditText.getText().toString());
         ArticleGroup group =(ArticleGroup) mGroupSpinner.getSelectedItem();
-        mArticle.setArticleGroup(group);
+        mArticle.setArticleGroupId(group.getId());
+        mArticle.setIsPublished(mPublishSwitch.isChecked());
         mArticle.setIsMyOwn(isMyOwn);
-        mArticle.setUpdateAtTimeStamp(System.currentTimeMillis() / 1000L);
-        mListener.onFragmentInteraction(mArticle,this.getId());
+        try {
+            if(mIsNewArticle){
+                sendRequestSaveArticle(mArticle);
+            }else{
+                sendRequestUpdateArticle(mArticle);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        //  mArticle.setUpdateAtTimeStamp(System.currentTimeMillis() / 1000L);
+      //
     }
 
     private void ChangeControlEnable(boolean isEnabled) {
@@ -237,6 +293,52 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
                 e.printStackTrace();
             }
         }
+    }
+    private void initGroupSpinner(ArticleGroup.GroupContainer categoriesResponse) {
+        ArrayAdapter<ArticleGroup> adapter;
+        List<ArticleGroup> list = Arrays.asList(categoriesResponse.categories);
+        adapter = new ArrayAdapter<ArticleGroup>(getActivity(),
+                android.R.layout.simple_spinner_item, list );
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mGroupSpinner.setAdapter(adapter);
+        if(mArticle.getArticleGroupId() != -1){
+            mGroupSpinner.setSelection(list.indexOf(mArticle.getArticleGroupId()));
+        }
+    }
+
+    public  void fillGroups(){
+        Cursor query = getActivity().getContentResolver().query(AppContentProvider.CONTENT_URI_GROUPS, null, null, null, null);
+        ArrayList<ArticleGroup> listFromCursor = ArticleGroup.createListFromCursor(query);
+
+        if(listFromCursor.isEmpty()) {
+            sendRequestGetGroups();
+        }else{
+            initGroupSpinner(new ArticleGroup.GroupContainer(listFromCursor.toArray(new ArticleGroup[]{})));
+        }
+
+    }
+
+
+    @Override
+    void receiveArticleCallback(Article article) {
+        mDataStateListenr.insert(article);
+        showSnackbar(R.string.snackbar_article_save_success_text, -1, null);
+    }
+
+    @Override
+    protected void showSnackbar(int stringResource, int scnakbarActionString, View.OnClickListener listener) {
+        mListener.showSnackBar(stringResource, scnakbarActionString, listener);
+    }
+
+    /**
+     * Callback for {@link #sendRequestGetGroups()}   of BaseFragment
+     * @param categoriesResponse
+     */
+    @Override
+    void receiveGroupsCallback(ArticleGroup.GroupContainer categoriesResponse) {
+        initGroupSpinner(categoriesResponse);
+        mDataStateListenr.insertAllGroups(categoriesResponse.categories);
     }
 
     /**

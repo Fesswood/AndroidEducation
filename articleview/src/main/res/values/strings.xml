@@ -16,4 +16,15 @@
     <string name="save">Save Article</string>
     <string name="expandable_list">Show Groups</string>
     <string name="simple_list">Hide Groups</string>
+    <string name="snackbar_article_text">Articles request failed</string>
+    <string name="snackbar_action">Try Again</string>
+    <string name="snackbar_group_text">Categories request faild</string>
+    <string name="snackbar_article_save_text">Save article request failed</string>
+    <string name="snackbar_new_article">New Article has created</string>
+    <string name="scnakbar_ok">OK</string>
+    <string name="snackbar_article_save_success_text">Article updated</string>
+    <string name="snackbar_cancel">Cancel</string>
+    <string name="dialog_message">WARNING! This action can not be canceled!</string>
+    <string name="dialog_title">Are you really want to delete Article?</string>
+    <string name="snackbar_delete_text">Delete request failed</string>
 </resources>

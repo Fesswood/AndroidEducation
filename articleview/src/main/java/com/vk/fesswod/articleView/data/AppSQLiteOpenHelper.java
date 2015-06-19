@@ -4,13 +4,18 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.Arrays;
+
 /**
  * Created by sergeyb on 17.06.15.
  */
 public class AppSQLiteOpenHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "Article.db";
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;
+    public static final String SQL_INSERT_OR_REPLACE = "__sql_insert_or_replace__";
+
+
 
     public static final String COLUMN_ID = "_id";
 
@@ -26,24 +31,24 @@ public class AppSQLiteOpenHelper extends SQLiteOpenHelper {
 
     private static final String CREATE_TABLE_ARTICLE = "" +
             "CREATE TABLE " + TABLE_ARTICLE + "(" +
-            COLUMN_ID + " integer primary key autoincrement," +
+            COLUMN_ID + " integer primary key ," +
             ARTICLES_COLUMN_TITLE   + " text," +
-            ARTICLES_COLUMN_DESC  + " text" +
-            ARTICLES_COLUMN_IS_PUBLISHED  + " integer" +
-            ARTICLES_COLUMN_IS_MYOWN  + " integer" +
-            ARTICLES_COLUMN_GROUP_ID  + " integer" +
-            ARTICLES_COLUMN_IMAGE_URL  + " text" +
-            ARTICLES_COLUMN_UPDATED_AT  + " integer" +
+            ARTICLES_COLUMN_DESC  + " text," +
+            ARTICLES_COLUMN_IS_PUBLISHED  + " integer," +
+            ARTICLES_COLUMN_IS_MYOWN  + " integer," +
+            ARTICLES_COLUMN_GROUP_ID  + " integer," +
+            ARTICLES_COLUMN_IMAGE_URL  + " text," +
+            ARTICLES_COLUMN_UPDATED_AT  + " integer," +
             ARTICLES_COLUMN_CREATED_AT  + " integer" +
             ");";
 
-    public static final String TABLE_GROUP = "GROUP";
+    public static final String TABLE_GROUP = "ARTICLE_GROUP";
     public static final String GROUPS_COLUMN_TITLE = "TITLE";
 
     private static final String CREATE_TABLE_GROUP = "" +
             "CREATE TABLE " + TABLE_GROUP + "(" +
-            COLUMN_ID + " integer primary key autoincrement," +
-            GROUPS_COLUMN_TITLE   + " text," +
+            COLUMN_ID + " integer primary key ," +
+            GROUPS_COLUMN_TITLE   + " text" +
             ");";
 
     public AppSQLiteOpenHelper(Context context) {
@@ -65,10 +70,11 @@ public class AppSQLiteOpenHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         String[] TABLES = {
                 TABLE_ARTICLE,
-                CREATE_TABLE_GROUP,
+                TABLE_GROUP,
         };
         for (final String table : TABLES) {
             db.execSQL("DROP TABLE IF EXISTS " + table);
         }
+        onCreate(db);
     }
 }

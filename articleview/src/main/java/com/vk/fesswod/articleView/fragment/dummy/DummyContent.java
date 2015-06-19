@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Helper class for providing sample content for user interfaces created by
@@ -53,7 +52,6 @@ public class DummyContent {
     private static void addItem(Article item) {
         ITEMS.add(item);
         ITEM_MAP.put(item.getTitle(), item);
-        GROUP_SET.add(item.getArticleGroup());
 
     }
 

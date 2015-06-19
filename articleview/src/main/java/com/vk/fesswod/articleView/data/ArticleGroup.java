@@ -3,6 +3,8 @@ package com.vk.fesswod.articleView.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 
+import java.util.ArrayList;
+
 import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.GROUPS_COLUMN_TITLE;
 import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.COLUMN_ID;
 
@@ -64,6 +66,22 @@ public class ArticleGroup {
         return new ArticleGroup(
                 c.getLong(idColId),
                 c.getString(titleColId));
+    }
+    public static ArrayList<ArticleGroup> createListFromCursor(Cursor c){
+        ArrayList<ArticleGroup> list = new ArrayList<>();
+        while (c.moveToNext()){
+            list.add(fromCursor(c));
+        }
+        c.close();
+        return list;
+    }
+
+    public static class GroupContainer{
+        public ArticleGroup[] categories;
+
+        public GroupContainer(ArticleGroup[] categories) {
+            this.categories = categories;
+        }
     }
 
 }

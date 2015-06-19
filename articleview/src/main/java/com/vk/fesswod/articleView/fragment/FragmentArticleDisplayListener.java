@@ -6,5 +6,5 @@ import com.vk.fesswod.articleView.data.Article;
  * Created by sergeyb on 17.06.15.
  */
 public interface FragmentArticleDisplayListener {
-    void displayArticle(Article article);
+    void showArticle(long article);
 }

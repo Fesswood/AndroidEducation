@@ -1,12 +1,12 @@
 package com.vk.fesswod.articleView.activity;
 
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.vk.fesswod.articleView.R;
-import com.vk.fesswod.articleView.data.Article;
 import com.vk.fesswod.articleView.fragment.FragmentArticleDisplayListener;
 import com.vk.fesswod.articleView.fragment.FragmentArticleList;
 import com.vk.fesswod.articleView.fragment.FragmentListDisplayListener;
@@ -23,6 +23,7 @@ public class MainActivity extends BaseActivity implements FragmentArticleList.Fr
         setContentView(R.layout.activity_main);
         mListDisplayLister = (FragmentListDisplayListener) getSupportFragmentManager()
                 .findFragmentById(R.id.list_article_fragment);
+        mListDisplayLister.setAdapter(adapter);
          mArticleDisplayListener = (FragmentArticleDisplayListener) getSupportFragmentManager()
                 .findFragmentById(R.id.article_fragment);
     }
@@ -50,15 +51,25 @@ public class MainActivity extends BaseActivity implements FragmentArticleList.Fr
     }
 
     @Override
-    public void onFragmentInteraction(Article article, int fragmentId) {
+    public void onFragmentInteraction(long id, int fragmentId) {
         switch (fragmentId){
             case R.id.list_article_fragment:
-                mArticleDisplayListener.displayArticle(article);
+                mArticleDisplayListener.showArticle(id);
                 break;
             case R.id.article_fragment:
-                mListDisplayLister.updateListWithItem(article);
+                mListDisplayLister.updateListWithItem(id);
                 break;
         }
+    }
+
+    @Override
+    public void showSnackBar(int stringResource, int scnakbarActionString, View.OnClickListener listener) {
+        Snackbar snackbar = Snackbar
+                .make(findViewById(R.id.linear_layout_root), stringResource, Snackbar.LENGTH_LONG);
+        if(listener != null){
+            snackbar.setAction(scnakbarActionString, listener);
+        }
+        snackbar.show(); // Don’t forget to show!
     }
 
 }

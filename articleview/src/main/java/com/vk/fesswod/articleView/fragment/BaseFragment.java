@@ -9,12 +9,276 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.View;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.vk.fesswod.articleView.AppController;
+import com.vk.fesswod.articleView.R;
+import com.vk.fesswod.articleView.data.AppContentProvider;
+import com.vk.fesswod.articleView.data.Article;
+import com.vk.fesswod.articleView.data.ArticleGroup;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by sergeyb on 16.06.15.
  */
-public class BaseFragment extends Fragment {
+public abstract class BaseFragment extends Fragment {
+
+
+    private static final String DEBUG_TAG = BaseFragment.class.getSimpleName();
+
+    /**
+     *
+     * @param categoriesResponse
+     */
+    void receiveGroupsCallback(ArticleGroup.GroupContainer categoriesResponse){
+        Log.d(DEBUG_TAG,"receiveGroupsCallback is empty!");
+    }
+    /**
+     *
+     * @param article
+     */
+    void receiveArticleCallback(Article article){
+        Log.d(DEBUG_TAG,"receiveArticleCallback is empty!");
+    }
+    /**
+     *
+     * @param articleContainer
+     */
+    void receiveArticlesCallback(Article.ArticleContainer articleContainer){
+        Log.d(DEBUG_TAG,"receiveArticlesCallback is empty!");
+    }
+    /**
+     *
+     * @param id
+     */
+    void receiveDeleteCallback(long id) {
+        Log.d(DEBUG_TAG,"receiveDeleteCallback is empty!");
+    }
+
+
+    protected void sendRequestGetArticles()  {
+        StringRequest req = new StringRequest(AppContentProvider.BASE_URL+"articles.json", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                final Gson gson =  new GsonBuilder()
+                        .setPrettyPrinting()
+                        .registerTypeAdapter(Article.class, new AppController.ArticleDeserializer())
+                        .create();
+                Article.ArticleContainer articleContainer = gson.fromJson(response,  Article.ArticleContainer.class);
+                receiveArticlesCallback(articleContainer);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.e("Error: ", error.getMessage());
+                showSnackbar(R.string.snackbar_article_text, R.string.snackbar_action, new
+                View.OnClickListener(){
+
+                    @Override
+                    public void onClick(View v) {
+                        sendRequestGetArticles();
+                    }
+                });
+            }
+        }){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String,String> params = new HashMap<String, String>();
+                params.put("Content-Type","application/json");
+                params.put("Authorization","Token token="+ AppContentProvider.TOKEN);
+                return params;
+            }
+        };
+        AppController.getInstance().addToRequestQueue(req);
+    }
+
+
+
+    protected abstract void showSnackbar(int stringResource, int scnakbarActionString, View.OnClickListener listener);
+
+
+    protected void sendRequestGetGroups() {
+        StringRequest req = new StringRequest(AppContentProvider.BASE_URL+"categories.json", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Gson gson = new Gson();
+                ArticleGroup.GroupContainer categoriesResponse = gson.fromJson(response, ArticleGroup.GroupContainer.class);
+                receiveGroupsCallback(categoriesResponse);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.e("Error: ", error.getMessage());
+                showSnackbar(R.string.snackbar_group_text, R.string.snackbar_action, new
+                        View.OnClickListener() {
+
+                            @Override
+                            public void onClick(View v) {
+                                sendRequestGetGroups();
+                            }
+                        });
+            }
+        }){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String,String> params = new HashMap<String, String>();
+                params.put("Content-Type","application/json");
+                params.put("Authorization","Token token="+ AppContentProvider.TOKEN);
+                return params;
+            }
+        };
+        AppController.getInstance().addToRequestQueue(req);
+    }
+
+    protected void sendRequestSaveArticle(final Article article) throws JSONException {
+
+        final Gson gson =  new GsonBuilder()
+                .setPrettyPrinting()
+                .registerTypeAdapter(Article.class, new AppController.ArticlefSerializer())
+                .create();
+        String jsonBody =  gson.toJson(article);
+        JSONObject jsonObject = new JSONObject(jsonBody);
+        JsonObjectRequest authorizationRequest = new JsonObjectRequest(Request.Method.POST,AppContentProvider.BASE_URL + "articles.json",jsonObject,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        final Gson gson =  new GsonBuilder()
+                                .setPrettyPrinting()
+                                .registerTypeAdapter(Article.class, new AppController.ArticleDeserializer())
+                                .create();
+                        String s = response.toString();
+                        Article articleResived= gson.fromJson(s,Article.class);
+                        receiveArticleCallback(articleResived);
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.e("Error: ", error.getMessage());
+                showSnackbar(R.string.snackbar_article_save_text, R.string.snackbar_action, new
+                        View.OnClickListener() {
+
+                            @Override
+                            public void onClick(View v) {
+                                try {
+                                    sendRequestSaveArticle(article);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Content-Type", "application/json");
+                params.put("Authorization", "Token token=" + AppContentProvider.TOKEN);
+                return params;
+            }
+
+        };
+
+        AppController.getInstance().addToRequestQueue(authorizationRequest);
+    }
+
+
+    protected void sendRequestUpdateArticle(final Article article) throws JSONException {
+
+        final Gson gson =  new GsonBuilder()
+                .setPrettyPrinting()
+                .registerTypeAdapter(Article.class, new AppController.ArticlefSerializer())
+                .create();
+        String jsonBody =  gson.toJson(article);
+        JSONObject jsonObject = new JSONObject(jsonBody);
+        JsonObjectRequest authorizationRequest = new JsonObjectRequest(Request.Method.PUT,AppContentProvider.BASE_URL + "articles/"+article.getId()+".json",jsonObject,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        final Gson gson =  new GsonBuilder()
+                                .setPrettyPrinting()
+                                .registerTypeAdapter(Article.class, new AppController.ArticleDeserializer())
+                                .create();
+                        String s = response.toString();
+                        Article articleResived= gson.fromJson(s,Article.class);
+                        receiveArticleCallback(articleResived);
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.e("Error: ", error.getMessage());
+                showSnackbar(R.string.snackbar_article_save_text, R.string.snackbar_action, new
+                        View.OnClickListener() {
+
+                            @Override
+                            public void onClick(View v) {
+                                try {
+                                    sendRequestSaveArticle(article);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Content-Type", "application/json");
+                params.put("Authorization", "Token token=" + AppContentProvider.TOKEN);
+                return params;
+            }
+
+        };
+
+        AppController.getInstance().addToRequestQueue(authorizationRequest);
+    }
+
+    protected void sendRequestDeleteArticle(final long id) {
+
+        StringRequest req = new StringRequest(Request.Method.DELETE, AppContentProvider.BASE_URL+"/articles/"+id+".json", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                receiveDeleteCallback(id);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.e("Error: ", error.getMessage());
+                showSnackbar(R.string.snackbar_delete_text, R.string.snackbar_action,null);
+            }
+        }){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String,String> params = new HashMap<String, String>();
+                params.put("Content-Type","application/json");
+                params.put("Authorization","Token token="+ AppContentProvider.TOKEN);
+                return params;
+            }
+        };
+        AppController.getInstance().addToRequestQueue(req);
+    }
+
+
+
     /**
      * Get a file path from a Uri. This will get the the path for Storage Access
      * Framework Documents, as well as the _data field for the MediaStore and
