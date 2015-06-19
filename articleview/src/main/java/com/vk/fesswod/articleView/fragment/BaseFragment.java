@@ -28,10 +28,14 @@ import com.vk.fesswod.articleView.R;
 import com.vk.fesswod.articleView.data.AppContentProvider;
 import com.vk.fesswod.articleView.data.Article;
 import com.vk.fesswod.articleView.data.ArticleGroup;
+import com.vk.fesswod.articleView.rest.PhotoMultipartRequest;
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +46,7 @@ public abstract class BaseFragment extends Fragment {
 
 
     private static final String DEBUG_TAG = BaseFragment.class.getSimpleName();
+    private static final long MAX_FILE_SIZE = 99999999999999l;
 
     /**
      *
@@ -276,8 +281,32 @@ public abstract class BaseFragment extends Fragment {
         };
         AppController.getInstance().addToRequestQueue(req);
     }
+    protected  void sendRequestPostPhoto(long articleID,Uri photoUri){
+       PhotoMultipartRequest req= new PhotoMultipartRequest(
+                AppContentProvider.BASE_URL + "articles/" + articleID + "/photos.json"
+                , new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(DEBUG_TAG,"Error "+ error.getMessage());
+            }
+        }, new Response.Listener() {
+            @Override
+            public void onResponse(Object response) {
+                Log.d(DEBUG_TAG, "Ehuuuuuuu ");
+            }
+        },new File(getPath(getActivity(),photoUri))){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<String, String>();
 
 
+                headers.put("Content-Type", "application/json");
+                headers.put("Authorization", "Token token=" + AppContentProvider.TOKEN);
+                return headers;
+            }
+        };
+        AppController.getInstance().addToRequestQueue(req);
+    }
 
     /**
      * Get a file path from a Uri. This will get the the path for Storage Access

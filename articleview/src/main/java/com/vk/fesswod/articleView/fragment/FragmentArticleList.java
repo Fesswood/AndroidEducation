@@ -193,7 +193,7 @@ public class FragmentArticleList extends BaseFragment implements  SimpleCursorAd
             public void onClick(DialogInterface dialog, int id) {
 
                 Object idWrapper =(Object) v.getTag();
-                sendRequestDeleteArticle(Long.parseLong((String) idWrapper));
+                    sendRequestDeleteArticle(Long.parseLong((String) idWrapper));
             }
         });
         builder.setNegativeButton(R.string.snackbar_cancel, new DialogInterface.OnClickListener() {

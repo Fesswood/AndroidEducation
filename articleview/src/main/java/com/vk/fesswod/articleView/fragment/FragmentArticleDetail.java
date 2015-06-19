@@ -78,6 +78,7 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
     private boolean isMyOwn = true;
     private Article mArticle;
     private boolean mIsNewArticle;
+    private Uri mImageUri;
 
     /**
      * Use this factory method to create a new instance of
@@ -236,6 +237,8 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        if(mImageUri !=null)
+            sendRequestPostPhoto(mArticle.getId(),mImageUri);
         //  mArticle.setUpdateAtTimeStamp(System.currentTimeMillis() / 1000L);
       //
     }
@@ -282,13 +285,13 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
 
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == getActivity().RESULT_OK && data != null && data.getData() != null) {
 
-            Uri uri = data.getData();
+            mImageUri = data.getData();
 
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), mImageUri);
                 // Log.d(TAG, String.valueOf(bitmap));
                 mArticleImageView.setImageBitmap(bitmap);
-                mArticle.setImageUri(getPath(getActivity(), uri));
+                mArticle.setImageUri(getPath(getActivity(), mImageUri));
             } catch (IOException e) {
                 e.printStackTrace();
             }
