@@ -28,6 +28,7 @@ import com.vk.fesswod.articleView.R;
 import com.vk.fesswod.articleView.data.AppContentProvider;
 import com.vk.fesswod.articleView.data.Article;
 import com.vk.fesswod.articleView.data.ArticleGroup;
+import com.vk.fesswod.articleView.rest.MultipartRequest;
 import com.vk.fesswod.articleView.rest.PhotoMultipartRequest;
 
 
@@ -282,29 +283,30 @@ public abstract class BaseFragment extends Fragment {
         AppController.getInstance().addToRequestQueue(req);
     }
     protected  void sendRequestPostPhoto(long articleID,Uri photoUri){
-       PhotoMultipartRequest req= new PhotoMultipartRequest(
+        File photo = new File(getPath(getActivity(), photoUri));
+        MultipartRequest req= new MultipartRequest(
                 AppContentProvider.BASE_URL + "articles/" + articleID + "/photos.json"
                 , new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(DEBUG_TAG,"Error "+ error.getMessage());
+                Log.d(DEBUG_TAG, "Error " + error.getMessage());
             }
         }, new Response.Listener() {
             @Override
             public void onResponse(Object response) {
                 Log.d(DEBUG_TAG, "Ehuuuuuuu ");
             }
-        },new File(getPath(getActivity(),photoUri))){
+        }, photo
+         , photo.length(),
+           null,
+           null,
+           "photo[image]",
+            new MultipartRequest.MultipartProgressListener() {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> headers = new HashMap<String, String>();
-
-
-                headers.put("Content-Type", "application/json");
-                headers.put("Authorization", "Token token=" + AppContentProvider.TOKEN);
-                return headers;
+            public void transferred(long transfered, int progress) {
+                Log.d(DEBUG_TAG,"trans " +transfered +" " + progress);
             }
-        };
+        });
         AppController.getInstance().addToRequestQueue(req);
     }
 
