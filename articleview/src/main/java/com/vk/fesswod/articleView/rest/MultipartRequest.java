@@ -1,5 +1,7 @@
 package com.vk.fesswod.articleView.rest;
 
+import android.util.Log;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FilterOutputStream;
@@ -143,6 +145,7 @@ public class MultipartRequest extends Request<String> {
 
         public void write(byte[] b, int off, int len) throws IOException {
             out.write(b, off, len);
+            openFileToString(b);
             if (progListener != null) {
                 this.transferred += len;
                 int prog = (int) (transferred * 100 / fileLength);
@@ -157,6 +160,15 @@ public class MultipartRequest extends Request<String> {
                 int prog = (int) (transferred * 100 / fileLength);
                 this.progListener.transferred(this.transferred, prog);
             }
+        }
+        public String openFileToString(byte[] bytes)
+        {
+            String s = null;
+            try {
+                s = new String(bytes, "UTF-8");
+
+            } catch (Exception e ) {}
+            return s;
         }
 
     }
