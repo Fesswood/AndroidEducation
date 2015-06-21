@@ -45,10 +45,17 @@
             android:id="@+id/imageButtonSearch"
             android:layout_margin="4dp"
             android:background="@color/primary_dark"
-            android:src="@drawable/search"
+            android:src="@android:drawable/ic_search_category_default"
             android:cropToPadding="false"/>
 
     </LinearLayout>
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Switch"
+        android:id="@+id/switch1"
+        android:layout_weight="1" />
 
     <LinearLayout
         android:orientation="horizontal"

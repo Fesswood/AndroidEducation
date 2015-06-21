@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -174,6 +175,13 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
 
         }
         fillGroups();
+        showImage();
+    }
+
+    private void showImage() {
+       if(!TextUtils.isEmpty(mArticle.getImageUri())){
+           sendRequestPhoto(mArticleImageView,mArticle.getImageUri());
+       }
     }
 
     private void fillArticleFromDB(long articleId) {
@@ -238,7 +246,7 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
             e.printStackTrace();
         }
         if(mImageUri !=null)
-            sendRequestPostPhoto(mArticle.getId(),mImageUri);
+            sendRequestSavePhoto(mArticle.getId(), mImageUri);
         //  mArticle.setUpdateAtTimeStamp(System.currentTimeMillis() / 1000L);
       //
     }
@@ -342,6 +350,12 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
     void receiveGroupsCallback(ArticleGroup.GroupContainer categoriesResponse) {
         initGroupSpinner(categoriesResponse);
         mDataStateListenr.insertAllGroups(categoriesResponse.categories);
+    }
+
+    @Override
+    void receivePhotoCallback(String imageUrl) {
+        mArticle.setImageUri(imageUrl);
+        mDataStateListenr.insert(mArticle);
     }
 
     /**

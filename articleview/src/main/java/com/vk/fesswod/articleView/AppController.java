@@ -84,73 +84,7 @@ public class AppController extends Application {
         }
     }
 
-    public static class ArticlefSerializer implements JsonSerializer<Article>
-    {
-        @Override
-        public JsonElement serialize(Article src, Type typeOfSrc, JsonSerializationContext context)
-        {
-            JsonObject result = new JsonObject();
-            JsonObject fields = new JsonObject();
-            fields.addProperty("title", src.getTitle());
-            fields.addProperty("description", src.getDesc());
-            fields.addProperty("published", src.isPublished());
-            fields.addProperty("category_id", src.getArticleGroupId());
 
-            result.add("Article", fields);
-            return fields;
-        }
-    }
-    public static class ArticleDeserializer implements JsonDeserializer<Article>
-    {
-        @Override
-        public Article deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
-        {
-            Article article;
-            JsonObject jsonObject;
-            JsonElement jsonRoot = json.getAsJsonObject().get("article");
-            if(jsonRoot != null){
-                jsonObject = jsonRoot.getAsJsonObject();
-            }else{
-                jsonObject = json.getAsJsonObject();
-            }
-
-
-            article = new Article(jsonObject.get("title").getAsString(),
-                                  jsonObject.get("description").getAsString()
-                                    );
-            article.setId(jsonObject.get("id").getAsLong());
-            article.setIsMyOwn(jsonObject.get("own").getAsBoolean());
-            article.setArticleGroupId(jsonObject.get("category_id").getAsInt());
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
-
-
-
-            if(jsonObject.get("created_at") != null){
-                try {
-                    Date created_at = simpleDateFormat.parse(jsonObject.get("created_at").getAsString());
-                    article.setCreateAtTimeStamp(created_at.getTime()/1000l);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    article.setCreateAtTimeStamp(0);
-                }
-            }
-            if(jsonObject.get("created_at") != null){
-                try {
-                    Date created_at = simpleDateFormat.parse(jsonObject.get("updated_at").getAsString());
-                    article.setUpdateAtTimeStamp(created_at.getTime()/1000l);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    article.setCreateAtTimeStamp(0);
-                }
-            }
-            JsonElement photo = jsonObject.get("photo");
-            if(photo!=null){
-                article.setImageUri(photo.getAsJsonObject().get("url").getAsString());
-            }
-
-            return article;
-        }
-    }
     public static class ArticleGroupDeserializer implements JsonDeserializer<ArticleGroup>
     {
         @Override

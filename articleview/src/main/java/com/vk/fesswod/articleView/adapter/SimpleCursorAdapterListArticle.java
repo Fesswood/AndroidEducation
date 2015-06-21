@@ -3,6 +3,8 @@ package com.vk.fesswod.articleView.adapter;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +19,7 @@ import com.vk.fesswod.articleView.fragment.FragmentArticleList;
 
 import android.widget.SimpleCursorAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,6 +29,7 @@ public class SimpleCursorAdapterListArticle extends SimpleCursorAdapter implemen
 
     private LayoutInflater mInflater;
     private ListItemDeleteListener mOnDeleteListener;
+
 
     public SimpleCursorAdapterListArticle(Context context, String[] from, int[] to) {
         super(context, R.layout.view_list_tem, null, from,
@@ -88,6 +92,9 @@ public class SimpleCursorAdapterListArticle extends SimpleCursorAdapter implemen
     public void setOnDeleteListener(ListItemDeleteListener onDeleteListener) {
         mOnDeleteListener = onDeleteListener;
     }
+
+
+
 
     /**
      * implementation of ViewHolder pattern for SpaceBodyListAdapter

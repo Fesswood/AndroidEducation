@@ -176,7 +176,7 @@ public class FragmentArticleList extends BaseFragment implements  SimpleCursorAd
      */
     public interface FragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(long id, int fragmentId);
+        void onFragmentInteraction(long id, int fragmentId);
         void showSnackBar(int stringResource, int scnakbarActionString, View.OnClickListener listener);
     }
     /**

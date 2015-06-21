@@ -2,6 +2,21 @@ package com.vk.fesswod.articleView.data;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.util.Log;
+
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+
+import java.lang.reflect.Type;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.*;
 /**
  * Created by sergeyb on 16.06.15.
@@ -39,11 +54,6 @@ public class Article {
         this.updateAtTimeStamp = updateAtTimeStamp;
     }
 
-    private static ArticleGroup getCurrentGroup(int articleGroupId) {
-        return null;
-    }
-
-
     public ContentValues buildContentValues() {
         ContentValues cv = new ContentValues();
         if (id >= 0) {
@@ -67,7 +77,7 @@ public class Article {
         int publishColId = c.getColumnIndex(ARTICLES_COLUMN_IS_PUBLISHED);
         int owmColId = c.getColumnIndex(ARTICLES_COLUMN_IS_MYOWN);
         int groupIdColId = c.getColumnIndex(ARTICLES_COLUMN_GROUP_ID);
-        int imageUrlolId = c.getColumnIndex(ARTICLES_COLUMN_IMAGE_URL);
+        int imageUrlId = c.getColumnIndex(ARTICLES_COLUMN_IMAGE_URL);
         int updateColId = c.getColumnIndex(ARTICLES_COLUMN_UPDATED_AT);
         int createColId = c.getColumnIndex(ARTICLES_COLUMN_CREATED_AT);
 
@@ -77,7 +87,7 @@ public class Article {
                 c.getString(descColId),
                 c.getInt(publishColId)==1?true:false,
                 c.getInt(owmColId)==1?true:false,
-                c.getString(imageUrlolId),
+                c.getString(imageUrlId),
                 c.getInt(groupIdColId),
                 c.getLong(updateColId),
                 c.getLong(createColId));
@@ -98,11 +108,88 @@ public class Article {
                                 "  isPublished:"+isPublished;
     }
 
+
+    public static class ArticleSerializer implements JsonSerializer<Article>
+    {
+        @Override
+        public JsonElement serialize(Article src, Type typeOfSrc, JsonSerializationContext context)
+        {
+            JsonObject result = new JsonObject();
+            JsonObject fields = new JsonObject();
+            fields.addProperty("title", src.getTitle());
+            fields.addProperty("description", src.getDesc());
+            fields.addProperty("published", src.isPublished());
+            fields.addProperty("category_id", src.getArticleGroupId());
+
+            result.add("Article", fields);
+            return fields;
+        }
+    }
+
+
+    public static class ArticleDeserializer implements JsonDeserializer<Article>
+    {
+        private static final String DEBUG_TAG = ArticleDeserializer.class.getSimpleName();
+
+        @Override
+        public Article deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
+        {
+            Article article;
+            JsonObject jsonObject;
+            JsonElement jsonRoot = json.getAsJsonObject().get("article");
+            if(jsonRoot != null){
+                jsonObject = jsonRoot.getAsJsonObject();
+            }else{
+                jsonObject = json.getAsJsonObject();
+            }
+
+
+            article = new Article(jsonObject.get("title").getAsString(),
+                                  jsonObject.get("description").getAsString()
+            );
+            article.setId(jsonObject.get("id").getAsLong());
+            article.setIsMyOwn(jsonObject.get("own").getAsBoolean());
+            article.setArticleGroupId(jsonObject.get("category_id").getAsInt());
+
+            if(jsonObject.get("photo") != null){
+                article.setImageUri(jsonObject.get("photo").getAsJsonObject().get("url").getAsString());
+            }
+
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+            if(jsonObject.get("created_at") != null){
+                try {
+                    Date created_at = simpleDateFormat.parse(jsonObject.get("created_at").getAsString());
+                    article.setCreateAtTimeStamp(created_at.getTime()/1000l);
+                } catch (ParseException e) {
+                    Log.d(DEBUG_TAG,e.getMessage());
+                    article.setCreateAtTimeStamp(0);
+                }
+            }
+            if(jsonObject.get("created_at") != null){
+                try {
+                    Date created_at = simpleDateFormat.parse(jsonObject.get("updated_at").getAsString());
+                    article.setUpdateAtTimeStamp(created_at.getTime()/1000l);
+                } catch (ParseException e) {
+                    Log.d(DEBUG_TAG, e.getMessage());
+                    article.setCreateAtTimeStamp(0);
+                }
+            }
+
+            return article;
+        }
+    }
+
+
+
     public static class ArticleContainer{
         public Article[] articles;
 
         public ArticleContainer(Article[] articles) {
             this.articles = articles;
+        }
+
+        public ArticleContainer() {
+
         }
     }
 

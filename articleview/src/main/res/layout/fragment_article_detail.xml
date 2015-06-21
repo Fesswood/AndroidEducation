@@ -115,7 +115,7 @@
                     android:id="@+id/floatingButtonAddImage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/icons"
+                    android:src="@android:drawable/ic_input_add"
                     app:elevation="4dp"
                     app:borderWidth="0dp"
                     android:layout_alignTop="@+id/imageViewThumb"

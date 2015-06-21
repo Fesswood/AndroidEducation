@@ -1,27 +1,27 @@
 package com.vk.fesswod.articleView.activity;
 
 
-import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.ContentValues;
 import android.content.CursorLoader;
-import android.content.DialogInterface;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
-import android.widget.SimpleCursorAdapter;
 
 import com.vk.fesswod.articleView.R;
 import com.vk.fesswod.articleView.adapter.SimpleCursorAdapterListArticle;
 import com.vk.fesswod.articleView.data.AppContentProvider;
+import com.vk.fesswod.articleView.data.AppSQLiteOpenHelper;
 import com.vk.fesswod.articleView.data.Article;
 import com.vk.fesswod.articleView.data.ArticleGroup;
 import com.vk.fesswod.articleView.fragment.FragmentArticleList;
-import com.vk.fesswod.articleView.fragment.dummy.DummyContent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.*;
 /**
@@ -29,13 +29,13 @@ import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.*;
  */
 public class BaseActivity extends FragmentActivity implements DataStateChangeListener, LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final int ACTIVITY_CREATE = 0;
-    private static final int ACTIVITY_EDIT = 1;
-    private static final int DELETE_ID = 0;
     private static final String DEBUG_TAG = FragmentArticleList.class.getSimpleName();
+    private static final String SELECTION = "SELECTION";
+    private static final String SELECTION_ARGS = "SELECTION_ARGS";
     protected SimpleCursorAdapterListArticle adapter;
     private Uri mArticleUri;
     boolean keepInsertedArticle=false;
+    private int ARTICLES_LOADER = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,18 +45,62 @@ public class BaseActivity extends FragmentActivity implements DataStateChangeLis
     }
 
     private void fillData() {
+        Log.d(DEBUG_TAG,"fillData");
         // Fields from the database (projection)
         // Must include the _id column for the adapter to work
         String[] from = new String[] {COLUMN_ID,ARTICLES_COLUMN_TITLE };
         // Fields on the UI to which we map
         int[] to = new int[] { R.id.textViewTitle };
-
-        Log.d(DEBUG_TAG,"fillData");
-        getLoaderManager().initLoader(0, null, this);
+        getLoaderManager().initLoader(ARTICLES_LOADER, null, this);
         adapter = new SimpleCursorAdapterListArticle(this, from, to);
-
-
     }
+
+
+    /**
+     * setup filter and init query from DB
+     */
+    private void initFilter(boolean mIsOnlyMyFilter,boolean misUnpublishedFilter,CharSequence mKeyword){
+
+        List<String> selectionArgs		= new ArrayList<>();
+        StringBuilder filterSelection	= new StringBuilder();
+        if(mIsOnlyMyFilter) {
+            filterSelection.append(AppSQLiteOpenHelper.ARTICLES_COLUMN_IS_MYOWN);
+            filterSelection.append("= ? ");
+            selectionArgs.add("1");
+        }
+        if(misUnpublishedFilter) {
+            if(filterSelection.length() > 0){
+                filterSelection.append( " AND " );
+            }
+            filterSelection.append(AppSQLiteOpenHelper.ARTICLES_COLUMN_IS_PUBLISHED);
+            filterSelection.append("= ?");
+            selectionArgs.add("1");
+        }
+        if(!TextUtils.isEmpty(mKeyword)) {
+            if(filterSelection.length() > 0){
+                filterSelection.append( " AND " );
+            }
+            filterSelection.append( AppSQLiteOpenHelper.ARTICLES_COLUMN_TITLE);
+            filterSelection.append( " LIKE ?");
+            selectionArgs.add( mKeyword + "%");
+
+        }
+
+        Bundle args = null;
+        if(filterSelection.length() > 0) {
+            args	= new Bundle();
+            args.putString(SELECTION, filterSelection.toString());
+            args.putStringArray(SELECTION_ARGS
+                    , selectionArgs.toArray(new String[selectionArgs.size()]));
+        }
+
+        getLoaderManager().restartLoader(ARTICLES_LOADER, args, this);
+    }
+
+
+
+
+
 
     @Override
     public boolean delete(long id) {
@@ -118,8 +162,15 @@ public class BaseActivity extends FragmentActivity implements DataStateChangeLis
                 ARTICLES_COLUMN_IS_MYOWN
         };
         String orderBy =COLUMN_ID+","+ARTICLES_COLUMN_TITLE;
+        String selection = null;
+        String[] selectionARGS = null;
+        if(args != null){
+           selection = args.getString(SELECTION);
+            selectionARGS = args.getStringArray(SELECTION_ARGS);
+        }
+
         CursorLoader cursorLoader = new CursorLoader(this,
-                AppContentProvider.CONTENT_URI_ARTICLES, projection, null, null, orderBy);
+                AppContentProvider.CONTENT_URI_ARTICLES, projection, selection, selectionARGS, orderBy);
 
 
         return cursorLoader;

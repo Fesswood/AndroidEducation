@@ -21,11 +21,13 @@ public class MainActivity extends BaseActivity implements FragmentArticleList.Fr
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mListDisplayLister = (FragmentListDisplayListener) getSupportFragmentManager()
-                .findFragmentById(R.id.list_article_fragment);
-        mListDisplayLister.setAdapter(adapter);
-         mArticleDisplayListener = (FragmentArticleDisplayListener) getSupportFragmentManager()
-                .findFragmentById(R.id.article_fragment);
+        if(savedInstanceState == null){
+            mListDisplayLister = (FragmentListDisplayListener) getSupportFragmentManager()
+                    .findFragmentById(R.id.list_article_fragment);
+            mListDisplayLister.setAdapter(adapter);
+            mArticleDisplayListener = (FragmentArticleDisplayListener) getSupportFragmentManager()
+                    .findFragmentById(R.id.article_fragment);
+        }
     }
 
     @Override

@@ -1,24 +1,28 @@
 package com.vk.fesswod.articleView.fragment;
 
 import android.annotation.TargetApi;
+import android.app.ProgressDialog;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
@@ -29,14 +33,12 @@ import com.vk.fesswod.articleView.data.AppContentProvider;
 import com.vk.fesswod.articleView.data.Article;
 import com.vk.fesswod.articleView.data.ArticleGroup;
 import com.vk.fesswod.articleView.rest.MultipartRequest;
-import com.vk.fesswod.articleView.rest.PhotoMultipartRequest;
 
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,42 +80,12 @@ public abstract class BaseFragment extends Fragment {
         Log.d(DEBUG_TAG,"receiveDeleteCallback is empty!");
     }
 
+    /**
+     *
+     * @param imageUrl
+     */
+    void receivePhotoCallback(String imageUrl){Log.d(DEBUG_TAG,"receivePhotoCallback is empty!");}
 
-    protected void sendRequestGetArticles()  {
-        StringRequest req = new StringRequest(AppContentProvider.BASE_URL+"articles.json", new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                final Gson gson =  new GsonBuilder()
-                        .setPrettyPrinting()
-                        .registerTypeAdapter(Article.class, new AppController.ArticleDeserializer())
-                        .create();
-                Article.ArticleContainer articleContainer = gson.fromJson(response,  Article.ArticleContainer.class);
-                receiveArticlesCallback(articleContainer);
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                VolleyLog.e("Error: ", error.getMessage());
-                showSnackbar(R.string.snackbar_article_text, R.string.snackbar_action, new
-                View.OnClickListener(){
-
-                    @Override
-                    public void onClick(View v) {
-                        sendRequestGetArticles();
-                    }
-                });
-            }
-        }){
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String,String> params = new HashMap<String, String>();
-                params.put("Content-Type","application/json");
-                params.put("Authorization","Token token="+ AppContentProvider.TOKEN);
-                return params;
-            }
-        };
-        AppController.getInstance().addToRequestQueue(req);
-    }
 
 
 
@@ -153,11 +125,47 @@ public abstract class BaseFragment extends Fragment {
         AppController.getInstance().addToRequestQueue(req);
     }
 
+    protected void sendRequestGetArticles()  {
+        StringRequest req = new StringRequest(AppContentProvider.BASE_URL+"articles.json", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                final Gson gson =  new GsonBuilder()
+                        .setPrettyPrinting()
+                        .registerTypeAdapter(Article.class, new Article.ArticleDeserializer())
+                        .create();
+                Article.ArticleContainer articleContainer = gson.fromJson(response,  Article.ArticleContainer.class);
+                receiveArticlesCallback(articleContainer);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.e("Error: ", error.getMessage());
+                showSnackbar(R.string.snackbar_article_text, R.string.snackbar_action, new
+                        View.OnClickListener(){
+
+                            @Override
+                            public void onClick(View v) {
+                                sendRequestGetArticles();
+                            }
+                        });
+            }
+        }){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String,String> params = new HashMap<String, String>();
+                params.put("Content-Type","application/json");
+                params.put("Authorization","Token token="+ AppContentProvider.TOKEN);
+                return params;
+            }
+        };
+        AppController.getInstance().addToRequestQueue(req);
+    }
+
     protected void sendRequestSaveArticle(final Article article) throws JSONException {
 
         final Gson gson =  new GsonBuilder()
                 .setPrettyPrinting()
-                .registerTypeAdapter(Article.class, new AppController.ArticlefSerializer())
+                .registerTypeAdapter(Article.class, new Article.ArticleSerializer())
                 .create();
         String jsonBody =  gson.toJson(article);
         JSONObject jsonObject = new JSONObject(jsonBody);
@@ -167,7 +175,7 @@ public abstract class BaseFragment extends Fragment {
                     public void onResponse(JSONObject response) {
                         final Gson gson =  new GsonBuilder()
                                 .setPrettyPrinting()
-                                .registerTypeAdapter(Article.class, new AppController.ArticleDeserializer())
+                                .registerTypeAdapter(Article.class, new Article.ArticleDeserializer())
                                 .create();
                         String s = response.toString();
                         Article articleResived= gson.fromJson(s,Article.class);
@@ -210,7 +218,7 @@ public abstract class BaseFragment extends Fragment {
 
         final Gson gson =  new GsonBuilder()
                 .setPrettyPrinting()
-                .registerTypeAdapter(Article.class, new AppController.ArticlefSerializer())
+                .registerTypeAdapter(Article.class, new Article.ArticleSerializer())
                 .create();
         String jsonBody =  gson.toJson(article);
         JSONObject jsonObject = new JSONObject(jsonBody);
@@ -220,7 +228,7 @@ public abstract class BaseFragment extends Fragment {
                     public void onResponse(JSONObject response) {
                         final Gson gson =  new GsonBuilder()
                                 .setPrettyPrinting()
-                                .registerTypeAdapter(Article.class, new AppController.ArticleDeserializer())
+                                .registerTypeAdapter(Article.class, new Article.ArticleDeserializer())
                                 .create();
                         String s = response.toString();
                         Article articleResived= gson.fromJson(s,Article.class);
@@ -282,7 +290,10 @@ public abstract class BaseFragment extends Fragment {
         };
         AppController.getInstance().addToRequestQueue(req);
     }
-    protected  void sendRequestPostPhoto(long articleID,Uri photoUri){
+    protected  void sendRequestSavePhoto(long articleID, Uri photoUri){
+        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), "dialog title",
+                "dialog message", true);
+
         File photo = new File(getPath(getActivity(), photoUri));
         MultipartRequest req= new MultipartRequest(
                 AppContentProvider.BASE_URL + "articles/" + articleID + "/photos.json"
@@ -290,11 +301,15 @@ public abstract class BaseFragment extends Fragment {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.d(DEBUG_TAG, "Error " + error.getMessage());
+                progressDialog.dismiss();
             }
         }, new Response.Listener() {
             @Override
             public void onResponse(Object response) {
                 Log.d(DEBUG_TAG, "Ehuuuuuuu ");
+                String imageUrl="";
+                receivePhotoCallback(imageUrl);
+                progressDialog.dismiss();
             }
         }, photo
          , photo.length(),
@@ -305,9 +320,31 @@ public abstract class BaseFragment extends Fragment {
             @Override
             public void transferred(long transfered, int progress) {
                 Log.d(DEBUG_TAG,"trans " +transfered +" " + progress);
+                progressDialog.incrementProgressBy(progress - progressDialog.getProgress());
             }
         });
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.setMax(100);
+        progressDialog.show();
         AppController.getInstance().addToRequestQueue(req);
+    }
+
+    protected void sendRequestPhoto(final ImageView imageView,String url){
+        // Retrieves an image specified by the URL, displays it in the UI.
+        ImageRequest request = new ImageRequest(url,
+                new Response.Listener<Bitmap>() {
+                    @Override
+                    public void onResponse(Bitmap bitmap) {
+                        imageView.setImageBitmap(bitmap);
+                    }
+                }, 0, 0, null,
+                new Response.ErrorListener() {
+                    public void onErrorResponse(VolleyError error) {
+                       Log.d(DEBUG_TAG,error.getMessage());
+                    }
+                });
+// Access the RequestQueue through your singleton class.
+        AppController.getInstance().addToRequestQueue(request);
     }
 
     /**
