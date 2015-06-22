@@ -45,27 +45,12 @@ import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.ARTICLES_COLUM
 import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.COLUMN_ID;
 
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link com.vk.fesswod.articleView.fragment.FragmentArticleDetail.FragmentArticleStateListener} interface
- * to handle interaction events.
- * Use the {@link FragmentArticleDetail#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class FragmentArticleDetail extends BaseFragment implements FragmentArticleDisplayListener, View.OnClickListener{
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+
     private static final int PICK_IMAGE_REQUEST = 100;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
     private FragmentArticleList.FragmentInteractionListener mListener;
-    private DataStateChangeListener mDataStateListenr;
+    private DataStateChangeListener mDataStateListener;
     private EditText mNameEditText;
     private EditText mDescEditText;
     private Spinner  mGroupSpinner;
@@ -81,35 +66,27 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
     private boolean mIsNewArticle;
     private Uri mImageUri;
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment FragmentArticleDetail.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static FragmentArticleDetail newInstance(String param1, String param2) {
-        FragmentArticleDetail fragment = new FragmentArticleDetail();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     public FragmentArticleDetail() {
         // Required empty public constructor
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (FragmentArticleList.FragmentInteractionListener) activity;
+            mDataStateListener = (DataStateChangeListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement FragmentInteractionListener");
         }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+        mDataStateListener = null;
     }
 
     @Override
@@ -135,23 +112,7 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
     }
 
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (FragmentArticleList.FragmentInteractionListener) activity;
-            mDataStateListenr = (DataStateChangeListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement FragmentInteractionListener");
-        }
-    }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
 
     @Override
     public void showArticle(long articleId) {
@@ -239,6 +200,7 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
         try {
             if(mIsNewArticle){
                 sendRequestSaveArticle(mArticle);
+                mIsNewArticle=false;
             }else{
                 sendRequestUpdateArticle(mArticle);
             }
@@ -312,6 +274,7 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
                 android.R.layout.simple_spinner_item, list );
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
         mGroupSpinner.setAdapter(adapter);
         if(mArticle.getArticleGroupId() != -1){
             mGroupSpinner.setSelection(list.indexOf(mArticle.getArticleGroupId()));
@@ -327,13 +290,14 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
         }else{
             initGroupSpinner(new ArticleGroup.GroupContainer(listFromCursor.toArray(new ArticleGroup[]{})));
         }
-
+     //   mGroupSpinner.setSelection((int)mArticle.getId());
     }
 
 
     @Override
     void receiveArticleCallback(Article article) {
-        mDataStateListenr.insert(article);
+        mDataStateListener.insert(article);
+        mArticle.setId(article.getId());
         showSnackbar(R.string.snackbar_article_save_success_text, -1, null);
     }
 
@@ -349,13 +313,13 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
     @Override
     void receiveGroupsCallback(ArticleGroup.GroupContainer categoriesResponse) {
         initGroupSpinner(categoriesResponse);
-        mDataStateListenr.insertAllGroups(categoriesResponse.categories);
+        mDataStateListener.insertAllGroups(categoriesResponse.categories);
     }
 
     @Override
     void receivePhotoCallback(String imageUrl) {
         mArticle.setImageUri(imageUrl);
-        mDataStateListenr.insert(mArticle);
+        mDataStateListener.insert(mArticle);
     }
 
     /**

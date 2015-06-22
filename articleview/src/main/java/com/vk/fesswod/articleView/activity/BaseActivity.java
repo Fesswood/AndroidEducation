@@ -27,7 +27,7 @@ import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.*;
 /**
  * Created by sergeyb on 16.06.15.
  */
-public class BaseActivity extends FragmentActivity implements DataStateChangeListener, LoaderManager.LoaderCallbacks<Cursor> {
+public class BaseActivity extends FragmentActivity implements ChangeFilterClauseListener,DataStateChangeListener, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String DEBUG_TAG = FragmentArticleList.class.getSimpleName();
     private static final String SELECTION = "SELECTION";
@@ -59,7 +59,8 @@ public class BaseActivity extends FragmentActivity implements DataStateChangeLis
     /**
      * setup filter and init query from DB
      */
-    private void initFilter(boolean mIsOnlyMyFilter,boolean misUnpublishedFilter,CharSequence mKeyword){
+    @Override
+    public void initFilter(boolean mIsOnlyMyFilter,boolean misUnpublishedFilter,CharSequence mKeyword){
 
         List<String> selectionArgs		= new ArrayList<>();
         StringBuilder filterSelection	= new StringBuilder();

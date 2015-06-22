@@ -13,54 +13,53 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Switch;
 
 import com.vk.fesswod.articleView.R;
+import com.vk.fesswod.articleView.activity.ChangeFilterClauseListener;
 import com.vk.fesswod.articleView.activity.DataStateChangeListener;
 import com.vk.fesswod.articleView.adapter.SimpleCursorAdapterListArticle;
 import com.vk.fesswod.articleView.data.AppContentProvider;
-import com.vk.fesswod.articleView.data.Article;
+import com.vk.fesswod.articleView.rest.ArticleContainer;
 
 import java.util.ArrayList;
 
 /**
- * A fragment representing a list of Items.
+ * A fragment representing a list of Articles.
  * <p>
  * <p>
  * Activities containing this fragment MUST implement the {@link FragmentInteractionListener}
  * interface.
  */
-public class FragmentArticleList extends BaseFragment implements  SimpleCursorAdapterListArticle.ListItemDeleteListener, AdapterView.OnItemClickListener , FragmentListDisplayListener, View.OnClickListener {
+public class FragmentArticleList extends BaseFragment implements  SimpleCursorAdapterListArticle.ListItemDeleteListener, AdapterView.OnItemClickListener , FragmentListDisplayListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+
     private static final String DEBUG_TAG = FragmentArticleList.class.getSimpleName();
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     private ListView mListView;
     private ExpandableListView mExpListView;
+    private SimpleCursorAdapterListArticle mAdapter;
+
+
+    private ImageButton mRefreshFilterButton;
+    private ImageButton mInitFilterButton;
+
+    private Switch mPublishedFilterSwitch;
+    private Switch mMyOwnFilterSwitch;
+    private EditText mKeyWordEditText;
+
+    private Spinner mListTypeSpinner;
+    private Button mAddArticleButton;
+    private ChangeFilterClauseListener mFilterListener;
     private FragmentInteractionListener mListener;
     private DataStateChangeListener mDataListener;
-    private SimpleCursorAdapterListArticle mAdapter;
-    private Spinner mListTypeSpinner;
-    private Button mButtonAddarticle;
 
-    // TODO: Rename and change types of parameters
-    public static FragmentArticleList newInstance(String param1, String param2) {
-        FragmentArticleList fragment = new FragmentArticleList();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -72,14 +71,7 @@ public class FragmentArticleList extends BaseFragment implements  SimpleCursorAd
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-            sendRequestGetArticles();
-
-        // TODO: Change Adapter to display your content
+        sendRequestGetArticles();
 
     }
 
@@ -89,9 +81,22 @@ public class FragmentArticleList extends BaseFragment implements  SimpleCursorAd
         View v = inflater.inflate(R.layout.fragment_article_list, null);
         mListView = (ListView) v.findViewById(R.id.listViewArticleTitle);
         mListView.setOnItemClickListener(this);
-        mButtonAddarticle = (Button) v.findViewById(R.id.buttonAddNewArticle);
+        mAddArticleButton = (Button) v.findViewById(R.id.buttonAddNewArticle);
         mListTypeSpinner = (Spinner) v.findViewById(R.id.spinnerChangeListType);
-        mButtonAddarticle.setOnClickListener(this);
+        mAddArticleButton.setOnClickListener(this);
+
+        mMyOwnFilterSwitch = (Switch) v.findViewById(R.id.switchSortOnlyMy);
+        mPublishedFilterSwitch  = (Switch) v.findViewById(R.id.switchSortPublished);
+
+        mKeyWordEditText = (EditText) v.findViewById(R.id.EditTextKeyWord);
+        mRefreshFilterButton= (ImageButton) v.findViewById(R.id.imageButtonRefreshFilter);
+        mInitFilterButton= (ImageButton) v.findViewById(R.id.imageButtonInitFilter);
+
+        mMyOwnFilterSwitch.setOnCheckedChangeListener(this);
+        mPublishedFilterSwitch.setOnCheckedChangeListener(this);
+        mRefreshFilterButton.setOnClickListener(this);
+        mInitFilterButton.setOnClickListener(this);
+
         initListTypeSpinner();
         return v;
     }
@@ -102,6 +107,7 @@ public class FragmentArticleList extends BaseFragment implements  SimpleCursorAd
         try {
             mListener = (FragmentInteractionListener) activity;
             mDataListener = (DataStateChangeListener) activity;
+            mFilterListener = (ChangeFilterClauseListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement FragmentInteractionListener");
@@ -135,7 +141,7 @@ public class FragmentArticleList extends BaseFragment implements  SimpleCursorAd
 
     @Override
     public void updateListWithItem(long article) {
-        Log.d(DEBUG_TAG,"article received"+ article);
+        Log.d(DEBUG_TAG, "article received" + article);
     }
 
     @Override
@@ -147,12 +153,44 @@ public class FragmentArticleList extends BaseFragment implements  SimpleCursorAd
 
     @Override
     public void onClick(View v) {
-        showSnackbar(R.string.snackbar_new_article, R.string.scnakbar_ok, null);
-        mListener.onFragmentInteraction(-1, FragmentArticleList.this.getId());
+        switch (v.getId()){
+            case R.id.buttonAddNewArticle:
+                showSnackbar(R.string.snackbar_new_article, R.string.scnakbar_ok, null);
+                mListener.onFragmentInteraction(-1, FragmentArticleList.this.getId());
+                break;
+            case R.id.imageButtonRefreshFilter:
+                cancelFilter();
+                break;
+
+            case R.id.imageButtonInitFilter:
+                filterArticles();
+                break;
+        }
     }
 
     @Override
-    void receiveArticlesCallback(Article.ArticleContainer articleContainer) {
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        filterArticles();
+
+    }
+
+    private void cancelFilter() {
+        mPublishedFilterSwitch.setChecked(false);
+        mMyOwnFilterSwitch.setChecked(false);
+        mKeyWordEditText.setText("");
+        filterArticles();
+    }
+
+    private void filterArticles() {
+        mFilterListener.initFilter(
+                mMyOwnFilterSwitch.isChecked(),
+                mPublishedFilterSwitch.isChecked(),
+                mKeyWordEditText.getText());
+    }
+
+
+    @Override
+    void receiveArticlesCallback(ArticleContainer articleContainer) {
         for (int i=0; i<articleContainer.articles.length;i++){
             mDataListener.insert(articleContainer.articles[i]);
         }
@@ -163,22 +201,6 @@ public class FragmentArticleList extends BaseFragment implements  SimpleCursorAd
         mListener.showSnackBar(stringResource, scnakbarActionString, listener);
     }
 
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface FragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(long id, int fragmentId);
-        void showSnackBar(int stringResource, int scnakbarActionString, View.OnClickListener listener);
-    }
     /**
      * CallBack from Adapter, when user click to delete button
      * @param v
@@ -212,5 +234,22 @@ public class FragmentArticleList extends BaseFragment implements  SimpleCursorAd
         Uri uri = Uri.parse(AppContentProvider.CONTENT_URI_ARTICLES + "/"
                 + id);
         getActivity().getContentResolver().delete(uri, null, null);
+    }
+
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface FragmentInteractionListener {
+        // TODO: Update argument type and name
+        void onFragmentInteraction(long id, int fragmentId);
+        void showSnackBar(int stringResource, int scnakbarActionString, View.OnClickListener listener);
     }
 }

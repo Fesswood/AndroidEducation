@@ -181,17 +181,7 @@ public class Article {
 
 
 
-    public static class ArticleContainer{
-        public Article[] articles;
 
-        public ArticleContainer(Article[] articles) {
-            this.articles = articles;
-        }
-
-        public ArticleContainer() {
-
-        }
-    }
 
     public long getId() {
         return id;

@@ -20,7 +20,7 @@
         <ImageButton
             android:layout_width="30dp"
             android:layout_height="match_parent"
-            android:id="@+id/imageButtonRefreshSearch"
+            android:id="@+id/imageButtonRefreshFilter"
             android:background="@color/primary_dark"
             android:src="@android:drawable/stat_notify_sync"
             android:layout_margin="4dp"
@@ -35,6 +35,7 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:id="@+id/EditTextKeyWord"
                 android:hint="@string/search_hint"
                 android:maxWidth="200dp"/>
         </android.support.design.widget.TextInputLayout>
@@ -42,7 +43,7 @@
         <ImageButton
             android:layout_width="30dp"
             android:layout_height="match_parent"
-            android:id="@+id/imageButtonSearch"
+            android:id="@+id/imageButtonInitFilter"
             android:layout_margin="4dp"
             android:background="@color/primary_dark"
             android:src="@drawable/search"
