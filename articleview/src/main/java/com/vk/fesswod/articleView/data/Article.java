@@ -9,49 +9,69 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
+import com.vk.fesswod.articleView.api.request.PhotoContainer;
 import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.*;
 /**
  * Created by sergeyb on 16.06.15.
  */
 public class Article {
-    long id;
-    private long server_id;
-    String title;
-    String desc;
-    boolean isPublished;
-    boolean isMyOwn;
-    long mArticleGroupId;
-    String mImageUri;
-    long createAtTimeStamp;
-    long updateAtTimeStamp;
+
+    private long id;
+
+    @Expose
+    private String title;
+
+    @Expose
+    @SerializedName("description")
+    private String desc;
+
+    @Expose
+    @SerializedName("published")
+    private boolean isPublished=true;
+
+    @SerializedName("own")
+    private boolean isMyOwn;
+
+    @Expose
+    @SerializedName("category_id")
+    private long mArticleGroupId;
+
+    @SerializedName("photo")
+    private PhotoContainer mPhotoContainer = new PhotoContainer();
+
+    @SerializedName("created_at")
+    private Date createAtTime;
+
+    @SerializedName("updated_at")
+    private Date updateAtTimeStamp;
+
 
     public Article(String title, String desc){
-        this(title,desc,true,-1,System.currentTimeMillis()/1000l);
+        this(title,desc,true,-1, new Date());
     }
 
-    public Article(String title, String desc, boolean isMyOwn, int articleGroupId, long createAtTimeStamp) {
-        this(-1, title, desc, false,isMyOwn,"", articleGroupId, createAtTimeStamp, -1l);
+    public Article(String title, String desc, boolean isMyOwn, int articleGroupId, Date createAtTime) {
+        this(-1, title, desc, false,isMyOwn,null, articleGroupId, createAtTime, createAtTime);
 
     }
 
-    private Article(long id, String title, String desc, boolean isPublished,boolean isMyOwn,String ImageUrl, int articleGroupId, long createAtTimeStamp, long updateAtTimeStamp) {
+    private Article(long id, String title, String desc, boolean isPublished,boolean isMyOwn,PhotoContainer ImageUrl, int articleGroupId, Date createAtTime, Date updateAtTimeStamp) {
         this.id = id;
-        this.title = title;
-        this.desc = desc;
-        this.isPublished = isPublished;
-        this.isMyOwn = isMyOwn;
-        this.mImageUri=ImageUrl;
-        this.mArticleGroupId = articleGroupId;
-        this.createAtTimeStamp = createAtTimeStamp;
-        this.updateAtTimeStamp = updateAtTimeStamp;
+        this.title = (title);
+        this.desc = (desc);
+        this.isPublished = (isPublished);
+        this.isMyOwn = (isMyOwn);
+        this.mPhotoContainer = ImageUrl;
+        this.setArticleGroupId(articleGroupId);
+        this.createAtTime = (createAtTime);
+        this.updateAtTimeStamp = (updateAtTimeStamp);
     }
 
     public ContentValues buildContentValues() {
@@ -59,14 +79,14 @@ public class Article {
         if (id >= 0) {
             cv.put(COLUMN_ID, id);
         }
-        cv.put(ARTICLES_COLUMN_TITLE, title);
-        cv.put(ARTICLES_COLUMN_DESC, desc);
-        cv.put(ARTICLES_COLUMN_IS_PUBLISHED, isPublished ? 1 : 0);
-        cv.put(ARTICLES_COLUMN_IS_MYOWN, isMyOwn?1:0);
-        cv.put(ARTICLES_COLUMN_GROUP_ID, mArticleGroupId);
-        cv.put(ARTICLES_COLUMN_IMAGE_URL, mImageUri);
-        cv.put(ARTICLES_COLUMN_UPDATED_AT, updateAtTimeStamp);
-        cv.put(ARTICLES_COLUMN_CREATED_AT, createAtTimeStamp);
+        cv.put(ARTICLES_COLUMN_TITLE, getTitle());
+        cv.put(ARTICLES_COLUMN_DESC, getDesc());
+        cv.put(ARTICLES_COLUMN_IS_PUBLISHED, isPublished() ? 1 : 0);
+        cv.put(ARTICLES_COLUMN_IS_MYOWN, isMyOwn() ?1:0);
+        cv.put(ARTICLES_COLUMN_GROUP_ID, getArticleGroupId());
+        cv.put(ARTICLES_COLUMN_IMAGE_URL, getPhotoContainer().getImageUrl());
+        cv.put(ARTICLES_COLUMN_UPDATED_AT, getUpdateAtTime().getTime());
+        cv.put(ARTICLES_COLUMN_CREATED_AT, getCreateAtTime().getTime());
         return cv;
     }
 
@@ -85,31 +105,39 @@ public class Article {
                 c.getLong(idColId),
                 c.getString(titleColId),
                 c.getString(descColId),
-                c.getInt(publishColId)==1?true:false,
-                c.getInt(owmColId)==1?true:false,
-                c.getString(imageUrlId),
+                c.getInt(publishColId)==1,
+                c.getInt(owmColId)==1,
+                new PhotoContainer(c.getString(imageUrlId)),
                 c.getInt(groupIdColId),
-                c.getLong(updateColId),
-                c.getLong(createColId));
+                new Date(c.getLong(updateColId)),
+                new Date(c.getLong(createColId)));
     }
 
     @Override
     public boolean equals(Object o) {
-        return super.equals(o) || (this.title == ((Article)o).getTitle() &&
-                                   this.desc == ((Article)o).getDesc()   &&
-                                   this.createAtTimeStamp == ((Article)o).getCreateAtTimeStamp() );
+        return super.equals(o) || (this.getTitle().equals(((Article) o).getTitle()) &&
+                                   this.getDesc().equals(((Article) o).getDesc())   &&
+                                   this.getCreateAtTime() == ((Article)o).getCreateAtTime() );
     }
 
     @Override
     public String toString() {
-        return super.toString()+" title:"+title+
-                                " desc:"+desc+
-                                " mArticleGroupId:"+ mArticleGroupId+
-                                "  isPublished:"+isPublished;
+        return super.toString()+" title:"+ getTitle() +
+                                " desc:"+ getDesc() +
+                                " mArticleGroupId: "+ getArticleGroupId() +
+                                " isPublished:"+ isPublished();
+    }
+
+    public PhotoContainer getPhotoContainer() {
+        return mPhotoContainer;
+    }
+
+    public void setPhotoContainer(PhotoContainer photoContainer) {
+        mPhotoContainer = photoContainer;
     }
 
 
-    public static class ArticleSerializer implements JsonSerializer<Article>
+   /* public static class ArticleSerializer implements JsonSerializer<Article>
     {
         @Override
         public JsonElement serialize(Article src, Type typeOfSrc, JsonSerializationContext context)
@@ -124,7 +152,7 @@ public class Article {
             result.add("Article", fields);
             return fields;
         }
-    }
+    }*/
 
 
     public static class ArticleDeserializer implements JsonDeserializer<Article>
@@ -159,26 +187,25 @@ public class Article {
             if(jsonObject.get("created_at") != null){
                 try {
                     Date created_at = simpleDateFormat.parse(jsonObject.get("created_at").getAsString());
-                    article.setCreateAtTimeStamp(created_at.getTime()/1000l);
+                    article.setCreateAtTime(created_at);
                 } catch (ParseException e) {
                     Log.d(DEBUG_TAG,e.getMessage());
-                    article.setCreateAtTimeStamp(0);
+                    article.setCreateAtTime(new Date());
                 }
             }
             if(jsonObject.get("created_at") != null){
                 try {
                     Date created_at = simpleDateFormat.parse(jsonObject.get("updated_at").getAsString());
-                    article.setUpdateAtTimeStamp(created_at.getTime()/1000l);
+                    article.setUpdateAtTime(created_at);
                 } catch (ParseException e) {
                     Log.d(DEBUG_TAG, e.getMessage());
-                    article.setCreateAtTimeStamp(0);
+                    article.setUpdateAtTime(new Date());
                 }
             }
 
             return article;
         }
     }
-
 
 
 
@@ -223,22 +250,6 @@ public class Article {
         this.mArticleGroupId = articleGroupId;
     }
 
-    public long getCreateAtTimeStamp() {
-        return createAtTimeStamp;
-    }
-
-    public void setCreateAtTimeStamp(long createAtTimeStamp) {
-        this.createAtTimeStamp = createAtTimeStamp;
-    }
-
-    public long getUpdateAtTimeStamp() {
-        return updateAtTimeStamp;
-    }
-
-    public void setUpdateAtTimeStamp(long updateAtTimeStamp) {
-        this.updateAtTimeStamp = updateAtTimeStamp;
-    }
-
     public boolean isMyOwn() {
         return isMyOwn;
     }
@@ -247,19 +258,28 @@ public class Article {
         this.isMyOwn = isMyOwn;
     }
 
-    public String getImageUri() {
-        return mImageUri;
-    }
 
     public void setImageUri(String imageUri) {
-        mImageUri = imageUri;
+        if(mPhotoContainer == null){
+            mPhotoContainer = new PhotoContainer();
+        }
+        mPhotoContainer.setImageUrl(imageUri);
     }
 
-    public long getServer_id() {
-        return server_id;
+    public Date getCreateAtTime() {
+        return createAtTime;
     }
 
-    public void setServer_id(long server_id) {
-        this.server_id = server_id;
+    public void setCreateAtTime(Date createAtTime) {
+        this.createAtTime = createAtTime;
     }
+
+    public Date getUpdateAtTime() {
+        return updateAtTimeStamp;
+    }
+
+    public void setUpdateAtTime(Date updateAtTimeStamp) {
+        this.updateAtTimeStamp = updateAtTimeStamp;
+    }
+
 }

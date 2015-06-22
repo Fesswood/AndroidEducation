@@ -24,7 +24,7 @@ public class MainActivity extends BaseActivity implements FragmentArticleList.Fr
         if(savedInstanceState == null){
             mListDisplayLister = (FragmentListDisplayListener) getSupportFragmentManager()
                     .findFragmentById(R.id.list_article_fragment);
-            mListDisplayLister.setAdapter(adapter);
+            mListDisplayLister.setAdapter(getAdapter(), getAdapterExp());
             mArticleDisplayListener = (FragmentArticleDisplayListener) getSupportFragmentManager()
                     .findFragmentById(R.id.article_fragment);
         }

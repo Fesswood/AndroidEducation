@@ -9,8 +9,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.text.TextUtils;
-import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.SQL_INSERT_OR_REPLACE;
 
+import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.*;
 import java.util.Arrays;
 
 
@@ -21,13 +21,16 @@ public class AppContentProvider extends ContentProvider {
     public static final String TOKEN = "3507c867e3a240c8f10bc40be3d765b4";
     private static final String PATH_ARTICLES = AppSQLiteOpenHelper.TABLE_ARTICLE;
     private static final String PATH_GROUPS = AppSQLiteOpenHelper.TABLE_GROUP;
+    private static final String PATH_NOT_EMPTY = "NOTEMPTYGROUPS";
 
     public static final Uri CONTENT_URI_ARTICLES = Uri.parse("content://" + AUTHORITY + "/" + PATH_ARTICLES);
     public static final Uri CONTENT_URI_GROUPS = Uri.parse("content://" + AUTHORITY + "/" + PATH_GROUPS);
-
+    public static final Uri CONTENT_URI_PATH_NOT_EMPTY = Uri.parse("content://" + AUTHORITY + "/" + PATH_NOT_EMPTY);
     private static final int CODE_ARTICLES = 0;
     private static final int CODE_ARTICLE = 2;
     private static final int CODE_GROUPS = 1;
+    private static final int CODE_NOT_EMPTY_GROUPS = 3;
+
 
     private static final UriMatcher sURI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
 
@@ -36,6 +39,7 @@ public class AppContentProvider extends ContentProvider {
         sURI_MATCHER.addURI(AUTHORITY, PATH_ARTICLES, CODE_ARTICLES);
         sURI_MATCHER.addURI(AUTHORITY, PATH_ARTICLES + "/#", CODE_ARTICLE);
         sURI_MATCHER.addURI(AUTHORITY, PATH_GROUPS, CODE_GROUPS);
+        sURI_MATCHER.addURI(AUTHORITY, PATH_NOT_EMPTY, CODE_NOT_EMPTY_GROUPS);
     }
 
     private static AppSQLiteOpenHelper dbHelper;
@@ -59,6 +63,8 @@ public class AppContentProvider extends ContentProvider {
         switch (match) {
             case CODE_GROUPS:
                 return getGroups();
+            case CODE_NOT_EMPTY_GROUPS:
+                return getNotEmptyGroups();
         }
         String table = parseUri(uri);
         Cursor cursor = dbHelper.getReadableDatabase()
@@ -168,6 +174,9 @@ public class AppContentProvider extends ContentProvider {
             case CODE_ARTICLE:
                 table = AppSQLiteOpenHelper.TABLE_ARTICLE;
                 break;
+            case CODE_NOT_EMPTY_GROUPS:
+                table = AppSQLiteOpenHelper.TABLE_GROUP;
+                break;
             default:
                 throw new IllegalArgumentException("Invalid code: " + match);
         }
@@ -181,6 +190,17 @@ public class AppContentProvider extends ContentProvider {
     private Cursor getGroups() {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String sql = "select * from "+ AppSQLiteOpenHelper.TABLE_GROUP;
+        return db.rawQuery(sql, null);
+    }
+    private Cursor getNotEmptyGroups() {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String sql = " select "+TABLE_GROUP+"."+COLUMN_ID+", "+
+                    TABLE_GROUP+"."+GROUPS_COLUMN_TITLE+
+                    " from "+ TABLE_GROUP
+                    +" inner join " +
+                    TABLE_ARTICLE
+                    +" on "+ TABLE_GROUP+"."+COLUMN_ID + " = " + TABLE_ARTICLE+"."+ARTICLES_COLUMN_GROUP_ID
+                    +" group by "  + TABLE_ARTICLE+"."+ARTICLES_COLUMN_GROUP_ID;
         return db.rawQuery(sql, null);
     }
 

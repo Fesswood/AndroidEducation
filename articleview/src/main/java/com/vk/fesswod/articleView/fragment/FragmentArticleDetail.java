@@ -1,7 +1,6 @@
 package com.vk.fesswod.articleView.fragment;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -25,7 +24,7 @@ import com.vk.fesswod.articleView.R;
 import com.vk.fesswod.articleView.activity.DataStateChangeListener;
 import com.vk.fesswod.articleView.data.AppContentProvider;
 import com.vk.fesswod.articleView.data.Article;
-import com.vk.fesswod.articleView.data.ArticleGroup;
+import com.vk.fesswod.articleView.data.ArticleCategory;
 
 import org.json.JSONException;
 
@@ -34,14 +33,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.ARTICLES_COLUMN_CREATED_AT;
-import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.ARTICLES_COLUMN_DESC;
-import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.ARTICLES_COLUMN_GROUP_ID;
-import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.ARTICLES_COLUMN_IMAGE_URL;
-import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.ARTICLES_COLUMN_IS_MYOWN;
-import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.ARTICLES_COLUMN_IS_PUBLISHED;
-import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.ARTICLES_COLUMN_TITLE;
-import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.ARTICLES_COLUMN_UPDATED_AT;
 import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.COLUMN_ID;
 
 
@@ -140,31 +131,23 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
     }
 
     private void showImage() {
-       if(!TextUtils.isEmpty(mArticle.getImageUri())){
-           sendRequestPhoto(mArticleImageView,mArticle.getImageUri());
+       if(mArticle.getPhotoContainer() != null
+          && !TextUtils.isEmpty(mArticle.getPhotoContainer().getImageUrl())){
+           sendRequestPhoto(mArticleImageView,mArticle.getPhotoContainer().getImageUrl());
+       }else {
+           mArticleImageView.setImageResource(android.R.color.transparent);
        }
     }
 
     private void fillArticleFromDB(long articleId) {
-        String[] projection = {
-                COLUMN_ID,
-                ARTICLES_COLUMN_TITLE ,
-                ARTICLES_COLUMN_DESC  ,
-                ARTICLES_COLUMN_IS_PUBLISHED,
-                ARTICLES_COLUMN_IS_MYOWN ,
-                ARTICLES_COLUMN_GROUP_ID,
-                ARTICLES_COLUMN_IMAGE_URL,
-                ARTICLES_COLUMN_UPDATED_AT,
-                ARTICLES_COLUMN_CREATED_AT
-        };
+
         Cursor cursor = getActivity().getContentResolver().query(
                 AppContentProvider.CONTENT_URI_ARTICLES,
-                projection,
+                null,
                 COLUMN_ID+" = ?",
                 new String[]{""+articleId},
                 null);
-        if (cursor != null) {
-            cursor.moveToFirst();
+        if (cursor.moveToFirst()) {
             mArticle= Article.fromCursor(cursor);
         }
         cursor.close();
@@ -193,7 +176,7 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
     private void saveArticle() {
         mArticle.setTitle(mNameEditText.getText().toString());
         mArticle.setDesc(mDescEditText.getText().toString());
-        ArticleGroup group =(ArticleGroup) mGroupSpinner.getSelectedItem();
+        ArticleCategory group =(ArticleCategory) mGroupSpinner.getSelectedItem();
         mArticle.setArticleGroupId(group.getId());
         mArticle.setIsPublished(mPublishSwitch.isChecked());
         mArticle.setIsMyOwn(isMyOwn);
@@ -207,10 +190,6 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        if(mImageUri !=null)
-            sendRequestSavePhoto(mArticle.getId(), mImageUri);
-        //  mArticle.setUpdateAtTimeStamp(System.currentTimeMillis() / 1000L);
-      //
     }
 
     private void ChangeControlEnable(boolean isEnabled) {
@@ -267,28 +246,48 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
             }
         }
     }
-    private void initGroupSpinner(ArticleGroup.GroupContainer categoriesResponse) {
-        ArrayAdapter<ArticleGroup> adapter;
-        List<ArticleGroup> list = Arrays.asList(categoriesResponse.categories);
-        adapter = new ArrayAdapter<ArticleGroup>(getActivity(),
+    private void initCurrentSpinner(ArticleCategory.GroupContainer categoriesResponse) {
+        ArrayAdapter<ArticleCategory> adapter;
+        List<ArticleCategory> list = Arrays.asList(categoriesResponse.categories);
+        adapter = new ArrayAdapter<ArticleCategory>(getActivity(),
                 android.R.layout.simple_spinner_item, list );
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         mGroupSpinner.setAdapter(adapter);
-        if(mArticle.getArticleGroupId() != -1){
-            mGroupSpinner.setSelection(list.indexOf(mArticle.getArticleGroupId()));
-        }
+
+        setCurrentCategory(adapter, list);
+
+
+    }
+
+    private void setCurrentCategory(ArrayAdapter<ArticleCategory> adapter, List<ArticleCategory> list) {
+       if(mArticle.getArticleGroupId() == 0){
+           //there are no normal selection
+           mGroupSpinner.setSelection(1);
+
+       }else {
+           ArticleCategory selectedGroup=new ArticleCategory();
+           long articleGroupId = mArticle.getArticleGroupId();
+           for(ArticleCategory articleGroup: list){
+               if(articleGroup.getId() == articleGroupId){
+                   selectedGroup=articleGroup;
+                   break;
+               }
+           }
+           mGroupSpinner.setSelection(adapter.getPosition(selectedGroup));
+       }
+
     }
 
     public  void fillGroups(){
         Cursor query = getActivity().getContentResolver().query(AppContentProvider.CONTENT_URI_GROUPS, null, null, null, null);
-        ArrayList<ArticleGroup> listFromCursor = ArticleGroup.createListFromCursor(query);
+        ArrayList<ArticleCategory> listFromCursor = ArticleCategory.createListFromCursor(query);
 
         if(listFromCursor.isEmpty()) {
             sendRequestGetGroups();
         }else{
-            initGroupSpinner(new ArticleGroup.GroupContainer(listFromCursor.toArray(new ArticleGroup[]{})));
+            initCurrentSpinner(new ArticleCategory.GroupContainer(listFromCursor.toArray(new ArticleCategory[]{})));
         }
      //   mGroupSpinner.setSelection((int)mArticle.getId());
     }
@@ -299,6 +298,9 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
         mDataStateListener.insert(article);
         mArticle.setId(article.getId());
         showSnackbar(R.string.snackbar_article_save_success_text, -1, null);
+        if(mImageUri !=null){
+            sendRequestSavePhoto(mArticle.getId(), mImageUri);
+        }
     }
 
     @Override
@@ -311,8 +313,8 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
      * @param categoriesResponse
      */
     @Override
-    void receiveGroupsCallback(ArticleGroup.GroupContainer categoriesResponse) {
-        initGroupSpinner(categoriesResponse);
+    void receiveGroupsCallback(ArticleCategory.GroupContainer categoriesResponse) {
+        initCurrentSpinner(categoriesResponse);
         mDataStateListener.insertAllGroups(categoriesResponse.categories);
     }
 

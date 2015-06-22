@@ -11,17 +11,22 @@ import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.COLUMN_ID;
 /**
  * Created by sergeyb on 16.06.15.
  */
-public class ArticleGroup {
+public class ArticleCategory {
     long id;
     String title;
 
-    public ArticleGroup(String title) {
+    public ArticleCategory(String title) {
         this.title = title;
     }
 
-    public ArticleGroup(long id, String title) {
+    public ArticleCategory(long id, String title) {
         this.id = id;
         this.title = title;
+    }
+
+    public ArticleCategory() {
+        id=0;
+        title="";
     }
 
     public long getId() {
@@ -47,7 +52,7 @@ public class ArticleGroup {
 
     @Override
     public boolean equals(Object o) {
-        return super.equals(o) || title.equals(((ArticleGroup)o).getTitle());
+        return super.equals(o) || title.equals(((ArticleCategory) o).getTitle());
     }
 
     public ContentValues buildContentValues() {
@@ -59,16 +64,16 @@ public class ArticleGroup {
         return cv;
     }
 
-    public static ArticleGroup fromCursor(Cursor c){
+    public static ArticleCategory fromCursor(Cursor c){
         int idColId = c.getColumnIndex(COLUMN_ID);
         int titleColId = c.getColumnIndex(GROUPS_COLUMN_TITLE);
 
-        return new ArticleGroup(
+        return new ArticleCategory(
                 c.getLong(idColId),
                 c.getString(titleColId));
     }
-    public static ArrayList<ArticleGroup> createListFromCursor(Cursor c){
-        ArrayList<ArticleGroup> list = new ArrayList<>();
+    public static ArrayList<ArticleCategory> createListFromCursor(Cursor c){
+        ArrayList<ArticleCategory> list = new ArrayList<>();
         while (c.moveToNext()){
             list.add(fromCursor(c));
         }
@@ -77,9 +82,9 @@ public class ArticleGroup {
     }
 
     public static class GroupContainer{
-        public ArticleGroup[] categories;
+        public ArticleCategory[] categories;
 
-        public GroupContainer(ArticleGroup[] categories) {
+        public GroupContainer(ArticleCategory[] categories) {
             this.categories = categories;
         }
     }

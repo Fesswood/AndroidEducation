@@ -24,9 +24,10 @@ import android.widget.Switch;
 import com.vk.fesswod.articleView.R;
 import com.vk.fesswod.articleView.activity.ChangeFilterClauseListener;
 import com.vk.fesswod.articleView.activity.DataStateChangeListener;
+import com.vk.fesswod.articleView.adapter.AdapterExpandableListArticle;
 import com.vk.fesswod.articleView.adapter.SimpleCursorAdapterListArticle;
 import com.vk.fesswod.articleView.data.AppContentProvider;
-import com.vk.fesswod.articleView.rest.ArticleContainer;
+import com.vk.fesswod.articleView.api.request.ArticleArrayContainer;
 
 import java.util.ArrayList;
 
@@ -37,7 +38,7 @@ import java.util.ArrayList;
  * Activities containing this fragment MUST implement the {@link FragmentInteractionListener}
  * interface.
  */
-public class FragmentArticleList extends BaseFragment implements  SimpleCursorAdapterListArticle.ListItemDeleteListener, AdapterView.OnItemClickListener , FragmentListDisplayListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener {
+public class FragmentArticleList extends BaseFragment implements  ListItemDeleteListener, AdapterView.OnItemClickListener , FragmentListDisplayListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener, ExpandableListView.OnChildClickListener {
 
 
     private static final String DEBUG_TAG = FragmentArticleList.class.getSimpleName();
@@ -59,6 +60,7 @@ public class FragmentArticleList extends BaseFragment implements  SimpleCursorAd
     private ChangeFilterClauseListener mFilterListener;
     private FragmentInteractionListener mListener;
     private DataStateChangeListener mDataListener;
+    private AdapterExpandableListArticle mAdapterExp;
 
 
     /**
@@ -81,8 +83,27 @@ public class FragmentArticleList extends BaseFragment implements  SimpleCursorAd
         View v = inflater.inflate(R.layout.fragment_article_list, null);
         mListView = (ListView) v.findViewById(R.id.listViewArticleTitle);
         mListView.setOnItemClickListener(this);
+        mExpListView = (ExpandableListView) v.findViewById(R.id.ExpandableListViewArticleCategories);
+        mExpListView.setOnChildClickListener(this);
         mAddArticleButton = (Button) v.findViewById(R.id.buttonAddNewArticle);
         mListTypeSpinner = (Spinner) v.findViewById(R.id.spinnerChangeListType);
+        mListTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(position == 0){
+                    mExpListView.setVisibility(View.VISIBLE);
+                    mListView.setVisibility(View.GONE);
+                }else if(position == 1){
+                    mExpListView.setVisibility(View.GONE);
+                    mListView.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
         mAddArticleButton.setOnClickListener(this);
 
         mMyOwnFilterSwitch = (Switch) v.findViewById(R.id.switchSortOnlyMy);
@@ -127,6 +148,16 @@ public class FragmentArticleList extends BaseFragment implements  SimpleCursorAd
             mListener.onFragmentInteraction(id,this.getId());
         }
     }
+    @Override
+    public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+        if (null != mListener) {
+            // Notify the active callbacks interface (the activity, if the
+            // fragment is attached to one) that an item has been selected.
+            mListener.onFragmentInteraction(id,this.getId());
+        }
+        return true;
+    }
+
 
     private void initListTypeSpinner() {
         ArrayAdapter<String> adapter;
@@ -145,10 +176,13 @@ public class FragmentArticleList extends BaseFragment implements  SimpleCursorAd
     }
 
     @Override
-    public void setAdapter(SimpleCursorAdapterListArticle adapter) {
+    public void setAdapter(SimpleCursorAdapterListArticle adapter, AdapterExpandableListArticle adapterExp) {
         mAdapter=adapter;
         mListView.setAdapter(mAdapter);
         mAdapter.setOnDeleteListener(this);
+        mAdapterExp= adapterExp;
+        mExpListView.setAdapter(mAdapterExp);
+        mAdapterExp.setOnDeleteListener(this);
     }
 
     @Override
@@ -190,10 +224,13 @@ public class FragmentArticleList extends BaseFragment implements  SimpleCursorAd
 
 
     @Override
-    void receiveArticlesCallback(ArticleContainer articleContainer) {
+    void receiveArticlesCallback(ArticleArrayContainer articleContainer) {
+        ArrayList<Long> serverIds=new ArrayList();
         for (int i=0; i<articleContainer.articles.length;i++){
             mDataListener.insert(articleContainer.articles[i]);
+            serverIds.add(articleContainer.articles[i].getId());
         }
+        mDataListener.synchronizeDB(serverIds);
     }
 
     @Override
@@ -208,25 +245,19 @@ public class FragmentArticleList extends BaseFragment implements  SimpleCursorAd
     @Override
     public void deleteArticle(final View v) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        // Add the buttons
         builder.setMessage(R.string.dialog_message)
-                .setTitle(R.string.dialog_title);
-        builder.setPositiveButton(R.string.scnakbar_ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
+               .setTitle(R.string.dialog_title)
+               .setPositiveButton(R.string.scnakbar_ok, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
 
-                Object idWrapper =(Object) v.getTag();
-                    sendRequestDeleteArticle(Long.parseLong((String) idWrapper));
-            }
-        });
-        builder.setNegativeButton(R.string.snackbar_cancel, new DialogInterface.OnClickListener() {
+                       Object idWrapper = (Object) v.getTag();
+                       sendRequestDeleteArticle(Long.parseLong((String) idWrapper));
+                   }
+               }).setNegativeButton(R.string.snackbar_cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // User cancelled the dialog
             }
-        });
-        // Set other dialog properties
-        // Create the AlertDialog
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        }).show();
     }
 
     @Override
@@ -235,6 +266,7 @@ public class FragmentArticleList extends BaseFragment implements  SimpleCursorAd
                 + id);
         getActivity().getContentResolver().delete(uri, null, null);
     }
+
 
 
     /**

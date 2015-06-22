@@ -16,6 +16,7 @@ import com.vk.fesswod.articleView.data.AppContentProvider;
 import com.vk.fesswod.articleView.data.AppSQLiteOpenHelper;
 import com.vk.fesswod.articleView.data.Article;
 import com.vk.fesswod.articleView.fragment.FragmentArticleList;
+import com.vk.fesswod.articleView.fragment.ListItemDeleteListener;
 
 import android.widget.SimpleCursorAdapter;
 
@@ -96,18 +97,10 @@ public class SimpleCursorAdapterListArticle extends SimpleCursorAdapter implemen
 
 
 
-    /**
-     * implementation of ViewHolder pattern for SpaceBodyListAdapter
-     */
-    static class ViewHolder {
-        public TextView titleView;
-        public ImageButton mDeleteButton;
-    }
+
 
     /**
      * Created by sergeyb on 19.06.15.
      */
-    public interface ListItemDeleteListener {
-        void deleteArticle(View v);
-    }
+
 }

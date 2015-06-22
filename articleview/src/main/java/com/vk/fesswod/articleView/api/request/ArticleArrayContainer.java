@@ -1,18 +1,18 @@
-package com.vk.fesswod.articleView.rest;
+package com.vk.fesswod.articleView.api.request;
 
 import com.vk.fesswod.articleView.data.Article;
 
 /**
  *  Wrapper for article received from server
  */
-public class ArticleContainer{
+public class ArticleArrayContainer {
     public Article[] articles;
 
-    public ArticleContainer(Article[] articles) {
+    public ArticleArrayContainer(Article[] articles) {
         this.articles = articles;
     }
 
-    public ArticleContainer() {
+    public ArticleArrayContainer() {
 
     }
 }

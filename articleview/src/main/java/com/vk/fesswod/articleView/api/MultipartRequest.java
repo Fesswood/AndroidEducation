@@ -1,6 +1,4 @@
-package com.vk.fesswod.articleView.rest;
-
-import android.util.Log;
+package com.vk.fesswod.articleView.api;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -23,7 +21,10 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyLog;
+import com.google.gson.Gson;
+import com.vk.fesswod.articleView.api.response.WrapperPhotoContainer;
 import com.vk.fesswod.articleView.data.AppContentProvider;
+import com.vk.fesswod.articleView.api.request.PhotoContainer;
 
 public class MultipartRequest extends Request<String> {
 
@@ -111,7 +112,8 @@ public class MultipartRequest extends Request<String> {
 
     @Override
     protected void deliverResponse(String response) {
-        mListener.onResponse(response);
+        WrapperPhotoContainer wrapperPhotoContainer = new Gson().fromJson(response, WrapperPhotoContainer.class);
+        mListener.onResponse(wrapperPhotoContainer.getPhoto().getImageUrl());
     }
 
 //Override getHeaders() if you want to put anything in header
@@ -119,7 +121,7 @@ public class MultipartRequest extends Request<String> {
     @Override
     public Map<String, String> getHeaders() throws AuthFailureError {
 
-        Map<String, String> headers =   headers= new HashMap<>();
+        Map<String, String> headers = new HashMap<>();
 
         headers.put("Content-Type", "application/json");
         headers.put("Authorization", "Token token=" + AppContentProvider.TOKEN);

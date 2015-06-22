@@ -6,7 +6,6 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -29,11 +28,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vk.fesswod.articleView.AppController;
 import com.vk.fesswod.articleView.R;
+import com.vk.fesswod.articleView.api.response.ArticleContainer;
 import com.vk.fesswod.articleView.data.AppContentProvider;
 import com.vk.fesswod.articleView.data.Article;
-import com.vk.fesswod.articleView.data.ArticleGroup;
-import com.vk.fesswod.articleView.rest.ArticleContainer;
-import com.vk.fesswod.articleView.rest.MultipartRequest;
+import com.vk.fesswod.articleView.data.ArticleCategory;
+import com.vk.fesswod.articleView.api.request.ArticleArrayContainer;
+import com.vk.fesswod.articleView.api.MultipartRequest;
 
 
 import org.json.JSONException;
@@ -56,7 +56,7 @@ public abstract class BaseFragment extends Fragment {
      *
      * @param categoriesResponse
      */
-    void receiveGroupsCallback(ArticleGroup.GroupContainer categoriesResponse){
+    void receiveGroupsCallback(ArticleCategory.GroupContainer categoriesResponse){
         Log.d(DEBUG_TAG,"receiveGroupsCallback is empty!");
     }
     /**
@@ -70,7 +70,7 @@ public abstract class BaseFragment extends Fragment {
      *
      * @param articleContainer
      */
-    void receiveArticlesCallback(ArticleContainer articleContainer){
+    void receiveArticlesCallback(ArticleArrayContainer articleContainer){
         Log.d(DEBUG_TAG,"receiveArticlesCallback is empty!");
     }
     /**
@@ -98,7 +98,7 @@ public abstract class BaseFragment extends Fragment {
             @Override
             public void onResponse(String response) {
                 Gson gson = new Gson();
-                ArticleGroup.GroupContainer categoriesResponse = gson.fromJson(response, ArticleGroup.GroupContainer.class);
+                ArticleCategory.GroupContainer categoriesResponse = gson.fromJson(response, ArticleCategory.GroupContainer.class);
                 receiveGroupsCallback(categoriesResponse);
             }
         }, new Response.ErrorListener() {
@@ -131,10 +131,9 @@ public abstract class BaseFragment extends Fragment {
             @Override
             public void onResponse(String response) {
                 final Gson gson =  new GsonBuilder()
-                        .setPrettyPrinting()
-                        .registerTypeAdapter(Article.class, new Article.ArticleDeserializer())
+                        .setDateFormat("yyyy-MM-dd HH:mm:ss Z")
                         .create();
-                ArticleContainer articleContainer = gson.fromJson(response,  ArticleContainer.class);
+                ArticleArrayContainer articleContainer = gson.fromJson(response,  ArticleArrayContainer.class);
                 receiveArticlesCallback(articleContainer);
             }
         }, new Response.ErrorListener() {
@@ -166,21 +165,21 @@ public abstract class BaseFragment extends Fragment {
 
         final Gson gson =  new GsonBuilder()
                 .setPrettyPrinting()
-                .registerTypeAdapter(Article.class, new Article.ArticleSerializer())
+                .excludeFieldsWithoutExposeAnnotation()
                 .create();
         String jsonBody =  gson.toJson(article);
         JSONObject jsonObject = new JSONObject(jsonBody);
+
         JsonObjectRequest authorizationRequest = new JsonObjectRequest(Request.Method.POST,AppContentProvider.BASE_URL + "articles.json",jsonObject,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         final Gson gson =  new GsonBuilder()
-                                .setPrettyPrinting()
-                                .registerTypeAdapter(Article.class, new Article.ArticleDeserializer())
+                                .setDateFormat("yyyy-MM-dd HH:mm:ss Z")
                                 .create();
                         String s = response.toString();
-                        Article articleResived= gson.fromJson(s,Article.class);
-                        receiveArticleCallback(articleResived);
+                        ArticleContainer articleResived= gson.fromJson(s, ArticleContainer.class);
+                        receiveArticleCallback(articleResived.getArticle());
 
                     }
                 }, new Response.ErrorListener() {
@@ -219,9 +218,9 @@ public abstract class BaseFragment extends Fragment {
 
         final Gson gson =  new GsonBuilder()
                 .setPrettyPrinting()
-                .registerTypeAdapter(Article.class, new Article.ArticleSerializer())
+                .excludeFieldsWithoutExposeAnnotation()
                 .create();
-        String jsonBody =  gson.toJson(article);
+        String jsonBody = gson.toJson(article);
         JSONObject jsonObject = new JSONObject(jsonBody);
         JsonObjectRequest authorizationRequest = new JsonObjectRequest(Request.Method.PUT,AppContentProvider.BASE_URL + "articles/"+article.getId()+".json",jsonObject,
                 new Response.Listener<JSONObject>() {
@@ -229,11 +228,11 @@ public abstract class BaseFragment extends Fragment {
                     public void onResponse(JSONObject response) {
                         final Gson gson =  new GsonBuilder()
                                 .setPrettyPrinting()
-                                .registerTypeAdapter(Article.class, new Article.ArticleDeserializer())
+                                .setDateFormat("yyyy-MM-dd HH:mm:ss Z")
                                 .create();
                         String s = response.toString();
-                        Article articleResived= gson.fromJson(s,Article.class);
-                        receiveArticleCallback(articleResived);
+                        ArticleContainer articleContainer = gson.fromJson(s, ArticleContainer.class);
+                        receiveArticleCallback(articleContainer.getArticle());
 
                     }
                 }, new Response.ErrorListener() {
@@ -304,11 +303,10 @@ public abstract class BaseFragment extends Fragment {
                 Log.d(DEBUG_TAG, "Error " + error.getMessage());
                 progressDialog.dismiss();
             }
-        }, new Response.Listener() {
+        }, new Response.Listener<String>() {
             @Override
-            public void onResponse(Object response) {
-                Log.d(DEBUG_TAG, "Ehuuuuuuu ");
-                String imageUrl="";
+            public void onResponse(String response) {
+                String imageUrl= response ;
                 receivePhotoCallback(imageUrl);
                 progressDialog.dismiss();
             }
