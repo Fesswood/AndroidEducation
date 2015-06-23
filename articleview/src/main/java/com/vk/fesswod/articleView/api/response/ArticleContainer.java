@@ -3,13 +3,16 @@ package com.vk.fesswod.articleView.api.response;
 import com.vk.fesswod.articleView.data.Article;
 
 /**
- * Created by sergeyb on 22.06.15.
+ *  Wrapper for article received from server
  */
 public class ArticleContainer {
-    public Article getArticle() {
-        return article;
+    public Article[] articles;
+
+    public ArticleContainer(Article[] articles) {
+        this.articles = articles;
     }
 
-    Article article;
+    public ArticleContainer() {
 
+    }
 }

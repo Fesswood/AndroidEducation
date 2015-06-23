@@ -80,13 +80,4 @@ public class ArticleCategory {
         c.close();
         return list;
     }
-
-    public static class GroupContainer{
-        public ArticleCategory[] categories;
-
-        public GroupContainer(ArticleCategory[] categories) {
-            this.categories = categories;
-        }
-    }
-
 }

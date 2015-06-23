@@ -27,7 +27,7 @@ import com.vk.fesswod.articleView.activity.DataStateChangeListener;
 import com.vk.fesswod.articleView.adapter.AdapterExpandableListArticle;
 import com.vk.fesswod.articleView.adapter.SimpleCursorAdapterListArticle;
 import com.vk.fesswod.articleView.data.AppContentProvider;
-import com.vk.fesswod.articleView.api.request.ArticleArrayContainer;
+import com.vk.fesswod.articleView.api.response.ArticleContainer;
 
 import java.util.ArrayList;
 
@@ -224,7 +224,7 @@ public class FragmentArticleList extends BaseFragment implements  ListItemDelete
 
 
     @Override
-    void receiveArticlesCallback(ArticleArrayContainer articleContainer) {
+    void receiveArticlesCallback(ArticleContainer articleContainer) {
         ArrayList<Long> serverIds=new ArrayList();
         for (int i=0; i<articleContainer.articles.length;i++){
             mDataListener.insert(articleContainer.articles[i]);

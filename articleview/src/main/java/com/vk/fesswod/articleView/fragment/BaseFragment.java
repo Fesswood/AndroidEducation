@@ -28,11 +28,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vk.fesswod.articleView.AppController;
 import com.vk.fesswod.articleView.R;
-import com.vk.fesswod.articleView.api.response.ArticleContainer;
+import com.vk.fesswod.articleView.api.response.CategoryContainer;
 import com.vk.fesswod.articleView.data.AppContentProvider;
 import com.vk.fesswod.articleView.data.Article;
 import com.vk.fesswod.articleView.data.ArticleCategory;
-import com.vk.fesswod.articleView.api.request.ArticleArrayContainer;
+import com.vk.fesswod.articleView.api.response.ArticleContainer;
 import com.vk.fesswod.articleView.api.MultipartRequest;
 
 
@@ -70,7 +70,7 @@ public abstract class BaseFragment extends Fragment {
      *
      * @param articleContainer
      */
-    void receiveArticlesCallback(ArticleArrayContainer articleContainer){
+    void receiveArticlesCallback(ArticleContainer articleContainer){
         Log.d(DEBUG_TAG,"receiveArticlesCallback is empty!");
     }
     /**
@@ -133,7 +133,7 @@ public abstract class BaseFragment extends Fragment {
                 final Gson gson =  new GsonBuilder()
                         .setDateFormat("yyyy-MM-dd HH:mm:ss Z")
                         .create();
-                ArticleArrayContainer articleContainer = gson.fromJson(response,  ArticleArrayContainer.class);
+                ArticleContainer articleContainer = gson.fromJson(response,  ArticleContainer.class);
                 receiveArticlesCallback(articleContainer);
             }
         }, new Response.ErrorListener() {
@@ -178,7 +178,7 @@ public abstract class BaseFragment extends Fragment {
                                 .setDateFormat("yyyy-MM-dd HH:mm:ss Z")
                                 .create();
                         String s = response.toString();
-                        ArticleContainer articleResived= gson.fromJson(s, ArticleContainer.class);
+                        CategoryContainer articleResived= gson.fromJson(s, CategoryContainer.class);
                         receiveArticleCallback(articleResived.getArticle());
 
                     }
@@ -231,7 +231,7 @@ public abstract class BaseFragment extends Fragment {
                                 .setDateFormat("yyyy-MM-dd HH:mm:ss Z")
                                 .create();
                         String s = response.toString();
-                        ArticleContainer articleContainer = gson.fromJson(s, ArticleContainer.class);
+                        CategoryContainer articleContainer = gson.fromJson(s, CategoryContainer.class);
                         receiveArticleCallback(articleContainer.getArticle());
 
                     }

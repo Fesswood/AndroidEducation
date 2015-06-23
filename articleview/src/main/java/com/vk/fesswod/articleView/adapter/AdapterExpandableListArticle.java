@@ -1,11 +1,14 @@
 package com.vk.fesswod.articleView.adapter;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.database.Cursor;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.SimpleCursorTreeAdapter;
 import android.widget.TextView;
 
@@ -43,6 +46,7 @@ public class AdapterExpandableListArticle  extends SimpleCursorTreeAdapter imple
         //super.bindGroupView(view, context, cursor, isExpanded);
         TextView groupTitle =(TextView) view.findViewById(R.id.textViewTitle);
         groupTitle.setText(cursor.getString(cursor.getColumnIndex(AppSQLiteOpenHelper.GROUPS_COLUMN_TITLE)));
+        view.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
     }
 
     @Override
