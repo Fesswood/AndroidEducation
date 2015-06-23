@@ -9,17 +9,19 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vk.fesswod.articleView.AppController;
-import com.vk.fesswod.articleView.api.response.ArticleContainer;
-import com.vk.fesswod.articleView.api.response.CategoryContainer;
+import com.vk.fesswod.articleView.api.response.ResponseArticleWrapper;
+import com.vk.fesswod.articleView.api.response.ResponseArticlesWrapper;
+import com.vk.fesswod.articleView.api.response.ResponseCategoriesWrapper;
 import com.vk.fesswod.articleView.api.response.DataResponse;
 import com.vk.fesswod.articleView.api.request.DataRequest;
+import com.vk.fesswod.articleView.api.response.ResponseImageUrlWrapper;
+import com.vk.fesswod.articleView.api.utils.Utils;
 import com.vk.fesswod.articleView.data.AppContentProvider;
 import com.vk.fesswod.articleView.data.AppSQLiteOpenHelper;
 import com.vk.fesswod.articleView.data.Article;
 import com.vk.fesswod.articleView.data.ArticleCategory;
 
 import java.io.File;
-import java.net.URI;
 import java.util.ArrayList;
 
 public class Requester {
@@ -30,15 +32,14 @@ public class Requester {
     }
 
     public DataResponse getCategories(DataRequest request) {
-        //TODO:start volley
-        RestClient restClient = new RestClient();
-        String url = getCategoriesUrl();
-        ApiResponse response = restClient.doGet(url);
-        Gson gson = new Gson();
+        RestClient  restClient = new RestClient();
+        String      url        = getCategoriesUrl();
+        ApiResponse response   = restClient.doGet(url);
+        Gson        gson       = new Gson();
 
-        CategoryContainer categoriesResponse = deSerealize(gson
+        ResponseCategoriesWrapper categoriesResponse = deserialize(gson
                 , response
-                , CategoryContainer.class);
+                , ResponseCategoriesWrapper.class);
 
         if(categoriesResponse != null){
             for (ArticleCategory category: categoriesResponse.categories){
@@ -57,10 +58,10 @@ public class Requester {
         String url = getArticlesUrl();
         ApiResponse response = restClient.doGet(url);
         Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss Z").create();
-        ArticleContainer articlesContainer = deSerealize(gson, response, ArticleContainer.class);
+        ResponseArticlesWrapper articlesWrapper = deserialize(gson, response, ResponseArticlesWrapper.class);
 
         // store to base
-        if(articlesContainer != null && articlesContainer.articles != null){
+        if(articlesWrapper != null && articlesWrapper.getArticles() != null){
             ArrayList<Long> ids = new ArrayList<>();
             // delete articles, that not exists in server's articles list
             Cursor cursor	= AppController.getAppContext().getContentResolver()
@@ -75,7 +76,7 @@ public class Requester {
 
             cursor.close();
 
-            for (Article article: articlesContainer.articles){
+            for (Article article: articlesWrapper.getArticles()){
                 ids.remove(article.getId());
 
                 AppController.getAppContext().getContentResolver()
@@ -93,24 +94,24 @@ public class Requester {
 
     public DataResponse addArticle(DataRequest request) {
         long id	= -1;
-        //TODO:start volley
+
         RestClient restClient	= new RestClient();
         String url				= putArticleUrl();
         Gson gson				= new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss Z").create();
         ApiResponse response	= restClient.doPost(url, null, request.getData());
-        ArticleContainer responseContainer = deSerealize(gson, response, ArticleContainer.class);
+        ResponseArticleWrapper responseWrapper = deserialize(gson, response, ResponseArticleWrapper.class);
 
-        if(responseContainer != null && responseContainer.article != null){
+        if(responseWrapper != null && responseWrapper.getArticle() != null){
             //insert into db
-            id	= responseContainer.article.getId();
+            id	= responseWrapper.getArticle().getId();
             AppController.getAppContext().getContentResolver()
                     .insert(AppContentProvider.CONTENT_URI_ARTICLES
-                            , responseContainer.article.buildContentValues());
+                            , responseWrapper.getArticle().buildContentValues());
 
             if(!TextUtils.isEmpty(request.getAdditionalData())){
                 addPhotoToArticle(id, request.getAdditionalData());
             }
-            Log.d(DEBUG_TAG, "article succesful sended");
+            Log.d(DEBUG_TAG, "article successfully sent");
         }
 
         return new DataResponse(id);
@@ -118,7 +119,6 @@ public class Requester {
 
     public DataResponse deleteArticle(DataRequest request) {
         long id	= -1;
-        //TODO:start volley
         RestClient restClient	= new RestClient();
         String url				= deleteArticleUrl(request.getId());
 
@@ -128,7 +128,8 @@ public class Requester {
             //delete in db
             id	= request.getId();
             AppController.getAppContext().getContentResolver()
-                    .delete(AppContentProvider.getArticlesUri(request.getId()), null, null);
+                    .delete(Uri.withAppendedPath(AppContentProvider.CONTENT_URI_ARTICLES, "" + id),
+                            null, null);
             Log.d(DEBUG_TAG, "article succesful edited");
         }
 
@@ -143,14 +144,16 @@ public class Requester {
         Gson gson				= new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss Z").create();
 
         ApiResponse response	= restClient.doPut(url, request.getData());
-        ArticleContainer responseContainer = deSerealize(gson, response, ArticleContainer.class);
+        ResponseArticleWrapper responseContainer = deserialize(gson, response, ResponseArticleWrapper.class);
 
-        if(responseContainer != null && responseContainer.article != null){
+        if(responseContainer != null && responseContainer.getArticle() != null){
             //update in db
-            id	= responseContainer.article.getId();
+            id	= responseContainer.getArticle().getId();
             AppController.getAppContext().getContentResolver()
-                    .update(AppContentProvider.getArticlesUri(id)
-                            , responseContainer.article.buildContentValues(), null, null);
+                    .update(Uri.withAppendedPath(AppContentProvider.CONTENT_URI_ARTICLES, "" + id)
+                            ,responseContainer.getArticle().buildContentValues()
+                            ,null
+                            ,null);
             if(!TextUtils.isEmpty(request.getAdditionalData())){
                 addPhotoToArticle(id, request.getAdditionalData());
             }
@@ -165,48 +168,48 @@ public class Requester {
         String url							= addImageUrl(id);
         Gson gson							= new Gson();
         Uri uri								= Uri.parse(imagePath);
-        File file							= new File(Utils.getFileNameByUri(AppController.getAppContext(),uri));
-        String response						= restClient.doUploadFile2(url, file, "photo[image]");
-        PhotoContainer responseContainer	= deSerealize(gson, response, PhotoContainer.class);
+        File file							= new File(Utils.getPath(AppController.getAppContext(), uri));
+        String response						= restClient.doMultiPartRequest(url, file, "photo[image]");
+        ResponseImageUrlWrapper responseContainer	= deserialize(gson, response, ResponseImageUrlWrapper.class);
 
-        if(responseContainer != null && responseContainer.photo != null) {
+        if(responseContainer != null && responseContainer.getPhoto() != null) {
             //update in db
             ContentValues values	= new ContentValues();
-            values.put(DbHelper.ARTICLES_PHOTO_URL,responseContainer.photo.url);
+            values.put(AppSQLiteOpenHelper.ARTICLES_COLUMN_IMAGE_URL,responseContainer.getPhoto().getImageUrl());
             AppController.getAppContext().getContentResolver()
-                    .update(AppContentProvider.getArticlesUri(id)
-                            , values, null, null);
+                    .update(Uri.withAppendedPath(AppContentProvider.CONTENT_URI_ARTICLES, "" + id),
+                           values, null, null);
             Log.d(DEBUG_TAG, "photo added succesfuly");
         }
     }
 
 
     private String getCategoriesUrl(){
-        return BASE_URL + "categories.json";
+        return BASE_URL.concat("categories.json");
     }
 
     private String getArticlesUrl(){
-        return BASE_URL + "articles.json";
+        return BASE_URL.concat("articles.json");
     }
 
     private String putArticleUrl(){
-        return BASE_URL + "articles.json";
+        return BASE_URL.concat("articles.json");
     }
 
     private String editArticleUrl(long id){
-        return BASE_URL + String.format("articles/%d.json",id);
+        return BASE_URL.concat(String.format("articles/%d.json", id));
     }
 
     private String deleteArticleUrl(long id){
-        return BASE_URL + String.format("articles/%d.json",id);
+        return BASE_URL.concat(String.format("articles/%d.json",id));
     }
 
     private String addImageUrl(long id){
-        return BASE_URL + String.format("articles/%d/photos.json",id);
+        return BASE_URL.concat(String.format("articles/%d/photos.json", id));
 
     }
 
-    private  <T> T deSerealize(Gson gson, ApiResponse response, Class<T> classOfT){
+    private  <T> T deserialize(Gson gson, ApiResponse response, Class<T> classOfT){
         if(response != null){
             try {
                 return gson.fromJson(response.getInputStreamReader()
@@ -219,7 +222,7 @@ public class Requester {
         return null;
     }
 
-    private  <T> T deSerealize(Gson gson, String response, Class<T> classOfT){
+    private  <T> T deserialize(Gson gson, String response, Class<T> classOfT){
         if(response != null){
             try {
                 return gson.fromJson(response, classOfT);

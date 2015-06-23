@@ -13,7 +13,7 @@ import java.io.Serializable;
 
 public class ApiService extends IntentService {
 
-    private static final String TAG = "ApiService";
+    private static final String DEBUG_TAG = ApiService.class.getSimpleName();
 
     public static final String CALLBACK_KEY         = "CALLBACK_KEY";
     public static final String ACTION_KEY           = "ACTION_KEY";
@@ -23,47 +23,57 @@ public class ApiService extends IntentService {
 
     public static final int ACTION_GET_CATEGORIES	= 0;
     public static final int ACTION_GET_ARTICLES		= 1;
-    public static final int ACTION_POST_ARTICLE	= 2;
+    public static final int ACTION_POST_ARTICLE	    = 2;
     public static final int ACTION_EDIT_ARTICLE		= 3;
     public static final int ACTION_DELETE_ARTICLE	= 4;
 
 
-    private boolean destroyed;
-    private ResultReceiver receiver;
+    private boolean mDestroyed;
+    private ResultReceiver mReceiver;
 
     public ApiService() {
-        super(TAG);
+        super(DEBUG_TAG);
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        receiver = intent.getParcelableExtra(CALLBACK_KEY);
+        mReceiver = intent.getParcelableExtra(CALLBACK_KEY);
         int action = intent.getIntExtra(ACTION_KEY, -1);
         Bundle data = processIntent(intent, action);
         sentMessage(action, data);
     }
 
     private Bundle processIntent(Intent intent, int  action){
+
+        DataResponse response	= null;
+        Requester requester		= new Requester();
+        Bundle bundle			= new Bundle();
+
+
         switch (action){
             case ACTION_GET_CATEGORIES:
-                return getData((DataRequest) getRequestObject(intent));
+                response = requester.getCategories((DataRequest) getRequestObject(intent));
+                break;
+
             case ACTION_GET_ARTICLES:
-                return getData((DataRequest) getRequestObject(intent));
+                response = requester.getArticles((DataRequest) getRequestObject(intent));
+                break;
+
             case ACTION_POST_ARTICLE:
-                return getData((DataRequest) getRequestObject(intent));
+                response = requester.addArticle((DataRequest) getRequestObject(intent));
+                break;
+
             case ACTION_EDIT_ARTICLE:
-                return getData((DataRequest) getRequestObject(intent));
+                response = requester.editArticle((DataRequest) getRequestObject(intent));
+                break;
+
             case ACTION_DELETE_ARTICLE:
-                return getData((DataRequest) getRequestObject(intent));
+                response = requester.deleteArticle((DataRequest) getRequestObject(intent));
+                break;
+
+            default:
+                return null;
         }
-        return null;
-    }
-
-    private Bundle getData(DataRequest request){
-        Requester requester = new Requester();
-        Bundle bundle = new Bundle();
-        DataResponse response = requester.getData(request);
-
         if(response == null){
             bundle.putBoolean(ERROR_KEY, true);
         } else {
@@ -72,29 +82,27 @@ public class ApiService extends IntentService {
         return bundle;
     }
 
-
-
     private Serializable getRequestObject(Intent intent){
         return intent.getSerializableExtra(REQUEST_OBJECT_KEY);
     }
 
     private void sentMessage(int code, Bundle data){
-        if(!destroyed && receiver != null){
-            receiver.send(code, data);
+        if(!mDestroyed && mReceiver != null){
+            mReceiver.send(code, data);
         }
     }
 
     @Override
     public void onCreate() {
-        destroyed = false;
+        mDestroyed = false;
         super.onCreate();
     }
 
     @Override
     public void onDestroy() {
-        destroyed = true;
-        receiver = null;
-        Log.d(TAG, "ResourceLoadService: onDestroy");
+        Log.d(DEBUG_TAG, "onDestroy");
+        mDestroyed = true;
+        mReceiver = null;
         super.onDestroy();
     }
 }

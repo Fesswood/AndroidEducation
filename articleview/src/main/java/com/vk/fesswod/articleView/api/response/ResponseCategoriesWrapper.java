@@ -5,9 +5,9 @@ import com.vk.fesswod.articleView.data.ArticleCategory;
 /**
  * Created by sergeyb on 23.06.15.
  */
-public class CategoryContainer {
+public class ResponseCategoriesWrapper {
     public ArticleCategory[] categories;
-    public CategoryContainer(ArticleCategory[] categories) {
+    public ResponseCategoriesWrapper(ArticleCategory[] categories) {
         this.categories = categories;
     }
 }

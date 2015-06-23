@@ -16,7 +16,7 @@ import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import com.vk.fesswod.articleView.api.request.PhotoContainer;
+import com.vk.fesswod.articleView.api.request.RequestImageUrlWrapper;
 import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.*;
 /**
  * Created by sergeyb on 16.06.15.
@@ -44,7 +44,7 @@ public class Article {
     private long mArticleGroupId;
 
     @SerializedName("photo")
-    private PhotoContainer mPhotoContainer = new PhotoContainer();
+    private RequestImageUrlWrapper mPhotoContainer = new RequestImageUrlWrapper();
 
     @SerializedName("created_at")
     private Date createAtTime;
@@ -58,11 +58,11 @@ public class Article {
     }
 
     public Article(String title, String desc, boolean isMyOwn, int articleGroupId, Date createAtTime) {
-        this(-1, title, desc, false,isMyOwn,null, articleGroupId, createAtTime, createAtTime);
+        this(-1, title, desc, false, isMyOwn, null, articleGroupId, createAtTime, createAtTime);
 
     }
 
-    private Article(long id, String title, String desc, boolean isPublished,boolean isMyOwn,PhotoContainer ImageUrl, int articleGroupId, Date createAtTime, Date updateAtTimeStamp) {
+    private Article(long id, String title, String desc, boolean isPublished,boolean isMyOwn,RequestImageUrlWrapper ImageUrl, int articleGroupId, Date createAtTime, Date updateAtTimeStamp) {
         this.id = id;
         this.title = (title);
         this.desc = (desc);
@@ -107,7 +107,7 @@ public class Article {
                 c.getString(descColId),
                 c.getInt(publishColId)==1,
                 c.getInt(owmColId)==1,
-                new PhotoContainer(c.getString(imageUrlId)),
+                new RequestImageUrlWrapper(c.getString(imageUrlId)),
                 c.getInt(groupIdColId),
                 new Date(c.getLong(updateColId)),
                 new Date(c.getLong(createColId)));
@@ -128,11 +128,11 @@ public class Article {
                                 " isPublished:"+ isPublished();
     }
 
-    public PhotoContainer getPhotoContainer() {
+    public RequestImageUrlWrapper getPhotoContainer() {
         return mPhotoContainer;
     }
 
-    public void setPhotoContainer(PhotoContainer photoContainer) {
+    public void setPhotoContainer(RequestImageUrlWrapper photoContainer) {
         mPhotoContainer = photoContainer;
     }
 
@@ -261,7 +261,7 @@ public class Article {
 
     public void setImageUri(String imageUri) {
         if(mPhotoContainer == null){
-            mPhotoContainer = new PhotoContainer();
+            mPhotoContainer = new RequestImageUrlWrapper();
         }
         mPhotoContainer.setImageUrl(imageUri);
     }

@@ -176,6 +176,14 @@ public class RestClient {
         return apiResponse;
     }
 
+    /**
+     * Use {@link doMultiPartRequest}
+     * @param urlString
+     * @param file
+     * @param fileParameterName
+     * @return
+     */
+    @Deprecated
     public String doUploadFile(String urlString, File file, String fileParameterName) {
         HttpURLConnection conn				= null;
         DataOutputStream dos				= null;
@@ -277,7 +285,7 @@ public class RestClient {
         return null;
     }
 
-    public String doUploadFile2(String urlString, File file, String fileParameterName) {
+    public String doMultiPartRequest(String urlString, File file, String fileParameterName) {
         HttpURLConnection conn				= null;
         DataOutputStream dos				= null;
         DataInputStream dis					= null;
