@@ -2,6 +2,7 @@ package com.vk.fesswod.articleView.api;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.util.Log;
 
@@ -14,6 +15,7 @@ import static com.vk.fesswod.articleView.api.ApiService.*;
 
 public class ApiServiceHelper {
     private static final String DEBUG_TAG = ApiService.class.getSimpleName();
+
 
     private static ApiServiceHelper instance;
 
@@ -55,7 +57,9 @@ public class ApiServiceHelper {
         Log.d(DEBUG_TAG, "startService with tag "+action);
         Intent intent = getIntent(action, onServiceResult);
         if(data != null){
-            intent.putExtra(REQUEST_OBJECT_KEY, data);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(REQUEST_VALUE_KEY, data);
+            intent.putExtra(REQUEST_WRAPPER_KEY, bundle);
         }
         getContext().startService(intent);
     }

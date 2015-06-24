@@ -90,16 +90,18 @@ public class AppContentProvider extends ContentProvider {
         }
 
         long id = -1;
+        Uri resultUri;
         if ( replace ) {
             id = db.replace(tableName, null, values);
         } else {
             id = db.insert(tableName, null, values);
+
         }
 
         if (-1 == id) {
             throw new RuntimeException("Record wasn't saved.");
         }
-        Uri resultUri = ContentUris.withAppendedId(uri, id);
+        resultUri = ContentUris.withAppendedId(uri, id);
         getContext().getContentResolver().notifyChange(resultUri, null);
 
         return resultUri;
@@ -143,10 +145,33 @@ public class AppContentProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        String table = parseUri(uri);
+        int result = 0;
+        int uriId = sURI_MATCHER.match(uri);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        int result = db.update(table, values, selection, selectionArgs);
+        switch (uriId){
 
+            case CODE_ARTICLES:
+                // update all articles
+                result	= db.update(AppSQLiteOpenHelper.TABLE_ARTICLE, values, selection, selectionArgs);
+                break;
+
+            case CODE_ARTICLE:
+                // update by ID
+                String id	= uri.getLastPathSegment();
+                if (TextUtils.isEmpty(selection)) {
+                    result = db.update(AppSQLiteOpenHelper.TABLE_ARTICLE
+                            , values, AppSQLiteOpenHelper.COLUMN_ID + " = ?", new String[]{id});
+                } else {
+                    result = db.update(AppSQLiteOpenHelper.TABLE_ARTICLE
+                            , values, AppSQLiteOpenHelper.COLUMN_ID + " = " + id + " AND "
+                            + selection, selectionArgs);
+                }
+                break;
+
+            case CODE_GROUPS:
+                result	= db.update(AppSQLiteOpenHelper.TABLE_GROUP, values, selection,selectionArgs);
+                break;
+        }
         getContext().getContentResolver().notifyChange(uri, null);
         return result;
     }

@@ -219,9 +219,11 @@ public class BaseActivity extends FragmentActivity implements ChangeFilterClause
     private CursorLoader createArticleCursorLoader(Bundle args) {
         String[] projection = { COLUMN_ID,
                 ARTICLES_COLUMN_TITLE,
-                ARTICLES_COLUMN_IS_MYOWN
+                ARTICLES_COLUMN_IS_MYOWN,
+                ARTICLES_COLUMN_CREATED_AT
         };
-        String orderBy =COLUMN_ID+","+ARTICLES_COLUMN_TITLE;
+        String orderBy =ARTICLES_COLUMN_CREATED_AT;
+                //+" DESC";
         String selection = null;
         String[] selectionARGS = null;
         if(args != null){

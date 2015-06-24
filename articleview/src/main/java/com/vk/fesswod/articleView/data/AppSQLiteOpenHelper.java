@@ -12,7 +12,7 @@ import java.util.Arrays;
 public class AppSQLiteOpenHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "Article.db";
-    private static final int DB_VERSION = 5;
+    private static final int DB_VERSION = 6;
     public static final String SQL_INSERT_OR_REPLACE = "__sql_insert_or_replace__";
 
 

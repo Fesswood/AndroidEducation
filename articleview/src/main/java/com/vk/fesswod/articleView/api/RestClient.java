@@ -91,6 +91,7 @@ public class RestClient {
     }
 
     public ApiResponse doPost(String url, List<NameValuePair> postParams, String string) {
+        Log.d(DEBUG_TAG, "doPost: " + url);
         ApiResponse apiResponse = new ApiResponse();
 
         HttpClient httpClient = getHttpClient();
@@ -115,7 +116,7 @@ public class RestClient {
             HttpResponse response = httpClient.execute(httpPost, localContext);
             apiResponse.status = response.getStatusLine().getStatusCode();
             apiResponse.body = response.getEntity();
-            Log.d(DEBUG_TAG, "doPost: " + url);
+            Log.d(DEBUG_TAG, "doPost: end.");
         } catch (final IOException e) {
             Log.e(DEBUG_TAG, Log.getStackTraceString(e));
         }
