@@ -17,8 +17,6 @@ import java.util.Arrays;
 public class AppContentProvider extends ContentProvider {
 
     private static final String AUTHORITY = "com.app.content_provider";
-    public static final String BASE_URL = "http://editors.yozhik.sibext.ru/";
-    public static final String TOKEN = "3507c867e3a240c8f10bc40be3d765b4";
     private static final String PATH_ARTICLES = AppSQLiteOpenHelper.TABLE_ARTICLE;
     private static final String PATH_GROUPS = AppSQLiteOpenHelper.TABLE_GROUP;
     private static final String PATH_NOT_EMPTY = "NOTEMPTYGROUPS";

@@ -3,7 +3,6 @@ package com.vk.fesswod.articleView.fragment;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -26,8 +25,7 @@ import com.vk.fesswod.articleView.activity.ChangeFilterClauseListener;
 import com.vk.fesswod.articleView.activity.DataStateChangeListener;
 import com.vk.fesswod.articleView.adapter.AdapterExpandableListArticle;
 import com.vk.fesswod.articleView.adapter.SimpleCursorAdapterListArticle;
-import com.vk.fesswod.articleView.data.AppContentProvider;
-import com.vk.fesswod.articleView.api.request.ArticleArrayContainer;
+import com.vk.fesswod.articleView.api.response.ArticleContainer;
 
 import java.util.ArrayList;
 
@@ -38,29 +36,30 @@ import java.util.ArrayList;
  * Activities containing this fragment MUST implement the {@link FragmentInteractionListener}
  * interface.
  */
-public class FragmentArticleList extends BaseFragment implements  ListItemDeleteListener, AdapterView.OnItemClickListener , FragmentListDisplayListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener, ExpandableListView.OnChildClickListener {
+public class FragmentArticleList extends BaseFragment implements  ListItemDeleteListener,
+                                                                  AdapterView.OnItemClickListener,
+                                                                  FragmentListDisplayListener,
+                                                                  View.OnClickListener,
+                                                                  CompoundButton.OnCheckedChangeListener,
+                                                                  ExpandableListView.OnChildClickListener,
+                                                                  BaseFragment.HttpResponseErrorListener,
+                                                                  BaseFragment.HttpResponseListener {
 
 
     private static final String DEBUG_TAG = FragmentArticleList.class.getSimpleName();
 
-    private ListView mListView;
-    private ExpandableListView mExpListView;
-    private SimpleCursorAdapterListArticle mAdapter;
+    private ListView                        mListView;
+    private ExpandableListView              mExpListView;
 
 
-    private ImageButton mRefreshFilterButton;
-    private ImageButton mInitFilterButton;
+    private Switch                          mPublishedFilterSwitch;
+    private Switch                          mMyOwnFilterSwitch;
+    private EditText                        mKeyWordEditText;
 
-    private Switch mPublishedFilterSwitch;
-    private Switch mMyOwnFilterSwitch;
-    private EditText mKeyWordEditText;
-
-    private Spinner mListTypeSpinner;
-    private Button mAddArticleButton;
-    private ChangeFilterClauseListener mFilterListener;
-    private FragmentInteractionListener mListener;
-    private DataStateChangeListener mDataListener;
-    private AdapterExpandableListArticle mAdapterExp;
+    private Spinner                         mListTypeSpinner;
+    private ChangeFilterClauseListener      mFilterListener;
+    private FragmentInteractionListener     mListener;
+    private DataStateChangeListener         mDataListener;
 
 
     /**
@@ -73,7 +72,7 @@ public class FragmentArticleList extends BaseFragment implements  ListItemDelete
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sendRequestGetArticles();
+        sendGetArticlesRequest(this, this, -1);
 
     }
 
@@ -85,7 +84,7 @@ public class FragmentArticleList extends BaseFragment implements  ListItemDelete
         mListView.setOnItemClickListener(this);
         mExpListView = (ExpandableListView) v.findViewById(R.id.ExpandableListViewArticleCategories);
         mExpListView.setOnChildClickListener(this);
-        mAddArticleButton = (Button) v.findViewById(R.id.buttonAddNewArticle);
+        Button mAddArticleButton = (Button) v.findViewById(R.id.buttonAddNewArticle);
         mListTypeSpinner = (Spinner) v.findViewById(R.id.spinnerChangeListType);
         mListTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -110,8 +109,8 @@ public class FragmentArticleList extends BaseFragment implements  ListItemDelete
         mPublishedFilterSwitch  = (Switch) v.findViewById(R.id.switchSortPublished);
 
         mKeyWordEditText = (EditText) v.findViewById(R.id.EditTextKeyWord);
-        mRefreshFilterButton= (ImageButton) v.findViewById(R.id.imageButtonRefreshFilter);
-        mInitFilterButton= (ImageButton) v.findViewById(R.id.imageButtonInitFilter);
+        ImageButton mRefreshFilterButton = (ImageButton) v.findViewById(R.id.imageButtonRefreshFilter);
+        ImageButton mInitFilterButton = (ImageButton) v.findViewById(R.id.imageButtonInitFilter);
 
         mMyOwnFilterSwitch.setOnCheckedChangeListener(this);
         mPublishedFilterSwitch.setOnCheckedChangeListener(this);
@@ -177,10 +176,10 @@ public class FragmentArticleList extends BaseFragment implements  ListItemDelete
 
     @Override
     public void setAdapter(SimpleCursorAdapterListArticle adapter, AdapterExpandableListArticle adapterExp) {
-        mAdapter=adapter;
+        SimpleCursorAdapterListArticle mAdapter = adapter;
         mListView.setAdapter(mAdapter);
         mAdapter.setOnDeleteListener(this);
-        mAdapterExp= adapterExp;
+        AdapterExpandableListArticle mAdapterExp = adapterExp;
         mExpListView.setAdapter(mAdapterExp);
         mAdapterExp.setOnDeleteListener(this);
     }
@@ -223,15 +222,7 @@ public class FragmentArticleList extends BaseFragment implements  ListItemDelete
     }
 
 
-    @Override
-    void receiveArticlesCallback(ArticleArrayContainer articleContainer) {
-        ArrayList<Long> serverIds=new ArrayList();
-        for (int i=0; i<articleContainer.articles.length;i++){
-            mDataListener.insert(articleContainer.articles[i]);
-            serverIds.add(articleContainer.articles[i].getId());
-        }
-        mDataListener.synchronizeDB(serverIds);
-    }
+
 
     @Override
     protected void showSnackbar(int stringResource, int scnakbarActionString, View.OnClickListener listener) {
@@ -251,7 +242,10 @@ public class FragmentArticleList extends BaseFragment implements  ListItemDelete
                    public void onClick(DialogInterface dialog, int id) {
 
                        Object idWrapper = (Object) v.getTag();
-                       sendRequestDeleteArticle(Long.parseLong((String) idWrapper));
+                       sendDeleteArticleRequest(Long.parseLong((String) idWrapper),
+                               FragmentArticleList.this,
+                               FragmentArticleList.this);
+
                    }
                }).setNegativeButton(R.string.snackbar_cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
@@ -260,13 +254,21 @@ public class FragmentArticleList extends BaseFragment implements  ListItemDelete
         }).show();
     }
 
+
+
+    /**
+     *  implimentation of HttpResponseErrorListener
+     */
     @Override
-    void receiveDeleteCallback(long id) {
-        Uri uri = Uri.parse(AppContentProvider.CONTENT_URI_ARTICLES + "/"
-                + id);
-        getActivity().getContentResolver().delete(uri, null, null);
+    public void onError() {
+        showSnackbar(R.string.something_goes_wrong,R.string.scnakbar_ok,null);
     }
 
+    @Override
+    public void onResponse(long id, int operationId) {
+
+        showSnackbar(R.string.snackbar_operation_success,R.string.scnakbar_ok,null);
+    }
 
 
     /**

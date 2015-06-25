@@ -2,14 +2,14 @@ package com.vk.fesswod.articleView.api.request;
 
 import com.google.gson.annotations.SerializedName;
 
-public class PhotoContainer {
+public class RequestImageUrlWrapper {
     @SerializedName("url")
     private String mImageUrl;
 
-    public PhotoContainer() {
+    public RequestImageUrlWrapper() {
     }
 
-    public PhotoContainer(String imageUrl) {
+    public RequestImageUrlWrapper(String imageUrl) {
         mImageUrl = imageUrl;
     }
 

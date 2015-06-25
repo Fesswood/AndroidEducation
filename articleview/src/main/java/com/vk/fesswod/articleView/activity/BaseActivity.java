@@ -44,7 +44,7 @@ public class BaseActivity extends FragmentActivity implements ChangeFilterClause
     private Uri mArticleUri;
     boolean keepInsertedArticle=false;
 
-    String[] childFrom = new String[] {COLUMN_ID,ARTICLES_COLUMN_TITLE,ARTICLES_COLUMN_IS_MYOWN };
+    String[] childFrom = new String[] {COLUMN_ID,ARTICLES_COLUMN_TITLE,ARTICLES_COLUMN_IS_MYOWN};
     // Fields on the UI to which we map
     int[] childTo = new int[] { R.id.textViewTitle };
 

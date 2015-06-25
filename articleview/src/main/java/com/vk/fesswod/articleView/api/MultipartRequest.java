@@ -22,10 +22,13 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyLog;
 import com.google.gson.Gson;
-import com.vk.fesswod.articleView.api.response.WrapperPhotoContainer;
+import com.vk.fesswod.articleView.api.response.ResponseImageUrlWrapper;
 import com.vk.fesswod.articleView.data.AppContentProvider;
-import com.vk.fesswod.articleView.api.request.PhotoContainer;
 
+/**
+ *  Use {@link RestClient} doMultipart  instead it
+ */
+@Deprecated
 public class MultipartRequest extends Request<String> {
 
     MultipartEntityBuilder entity = MultipartEntityBuilder.create();
@@ -112,7 +115,7 @@ public class MultipartRequest extends Request<String> {
 
     @Override
     protected void deliverResponse(String response) {
-        WrapperPhotoContainer wrapperPhotoContainer = new Gson().fromJson(response, WrapperPhotoContainer.class);
+        ResponseImageUrlWrapper wrapperPhotoContainer = new Gson().fromJson(response, ResponseImageUrlWrapper.class);
         mListener.onResponse(wrapperPhotoContainer.getPhoto().getImageUrl());
     }
 
@@ -124,7 +127,7 @@ public class MultipartRequest extends Request<String> {
         Map<String, String> headers = new HashMap<>();
 
         headers.put("Content-Type", "application/json");
-        headers.put("Authorization", "Token token=" + AppContentProvider.TOKEN);
+       // headers.put("Authorization", "Token token=" + Ao.TOKEN);
         return headers;
     }
 
