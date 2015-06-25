@@ -20,7 +20,7 @@
         <ImageButton
             android:layout_width="30dp"
             android:layout_height="match_parent"
-            android:id="@+id/imageButtonRefreshFilter"
+            android:id="@+id/imageButtonRefreshList"
             android:background="@color/primary_dark"
             android:src="@android:drawable/stat_notify_sync"
             android:layout_margin="4dp"

@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,7 +21,6 @@ import android.widget.Switch;
 
 import com.vk.fesswod.articleView.R;
 import com.vk.fesswod.articleView.activity.ChangeFilterClauseListener;
-import com.vk.fesswod.articleView.activity.DataStateChangeListener;
 import com.vk.fesswod.articleView.adapter.AdapterExpandableListArticle;
 import com.vk.fesswod.articleView.adapter.SimpleCursorAdapterListArticle;
 import java.util.ArrayList;
@@ -94,7 +92,7 @@ public class FragmentArticleList extends BaseFragment implements  ListItemDelete
         mPublishedFilterSwitch  = (Switch) v.findViewById(R.id.switchSortPublished);
         mKeyWordEditText        = (EditText) v.findViewById(R.id.EditTextKeyWord);
 
-        ImageButton refreshFilterButton  = (ImageButton) v.findViewById(R.id.imageButtonRefreshFilter);
+        ImageButton refreshListButton  = (ImageButton) v.findViewById(R.id.imageButtonRefreshList);
         ImageButton initFilterButton     = (ImageButton) v.findViewById(R.id.imageButtonInitFilter);
         Button      addArticleButton     = (Button) v.findViewById(R.id.buttonAddNewArticle);
 
@@ -103,7 +101,7 @@ public class FragmentArticleList extends BaseFragment implements  ListItemDelete
         mMyOwnFilterSwitch.setOnCheckedChangeListener(this);
         mPublishedFilterSwitch.setOnCheckedChangeListener(this);
         addArticleButton.setOnClickListener(this);
-        refreshFilterButton.setOnClickListener(this);
+        refreshListButton.setOnClickListener(this);
         initFilterButton.setOnClickListener(this);
 
         initListTypeSpinner();
@@ -180,8 +178,9 @@ public class FragmentArticleList extends BaseFragment implements  ListItemDelete
                 showSnackbar(R.string.snackbar_new_article, R.string.scnakbar_ok, null);
                 mListener.onFragmentInteraction(-1, FragmentArticleList.this.getId());
                 break;
-            case R.id.imageButtonRefreshFilter:
+            case R.id.imageButtonRefreshList:
                 cancelFilter();
+                sendGetArticlesRequest(this, this, BaseFragment.GET_ARTICLES);
                 break;
 
             case R.id.imageButtonInitFilter:

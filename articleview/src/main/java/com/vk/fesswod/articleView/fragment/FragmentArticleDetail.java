@@ -23,6 +23,7 @@ import com.vk.fesswod.articleView.R;
 import com.vk.fesswod.articleView.api.response.ResponseCategoriesWrapper;
 import com.vk.fesswod.articleView.api.utils.Utils;
 import com.vk.fesswod.articleView.data.AppContentProvider;
+import com.vk.fesswod.articleView.data.AppSQLiteOpenHelper;
 import com.vk.fesswod.articleView.data.Article;
 import com.vk.fesswod.articleView.data.ArticleCategory;
 
@@ -76,6 +77,13 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getLastArticle();
+    }
+
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_article_detail, null);
@@ -93,6 +101,7 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
         mEditArticleButton.setOnClickListener(this);
         mAddImageFloatingActionButton.setOnClickListener(this);
         mSaveButton.setOnClickListener(this);
+        fillField();
         return v;
     }
 
@@ -107,19 +116,20 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
             mIsNewArticle = true;
             mArticle = new Article("New Article", "Please add content here!");
         }
-        mNameEditText.setText(mArticle.getTitle());
-        mDescEditText.setText(mArticle.getDesc());
-        mPublishSwitch.setChecked(mArticle.isPublished());
-        if (!mArticle.isMyOwn()) {
-            ChangeControlEnable(false);
-            mEditArticleButton.setVisibility(View.GONE);
-        } else {
-            ChangeControlEnable(true);
-            mEditArticleButton.setVisibility(View.VISIBLE);
+        fillField();
+    }
 
+    private void getLastArticle() {
+        Cursor query = getActivity().getContentResolver().query(
+                AppContentProvider.CONTENT_URI_ARTICLES,
+               null, null, null, AppSQLiteOpenHelper.ARTICLES_COLUMN_UPDATED_AT+
+                        " DESC "+
+                        "LIMIT 1\n");
+        while (query.moveToNext()){
+            mArticle=Article.fromCursor(query);
+            break;
         }
-        fillCategories();
-        showImage();
+        query.close();
     }
 
     private void showImage() {
@@ -145,6 +155,23 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
         cursor.close();
     }
 
+    private void fillField() {
+        if(mArticle != null){
+            mNameEditText.setText(mArticle.getTitle());
+            mDescEditText.setText(mArticle.getDesc());
+            mPublishSwitch.setChecked(mArticle.isPublished());
+            if (!mArticle.isMyOwn()) {
+                ChangeControlEnable(false);
+                mEditArticleButton.setVisibility(View.GONE);
+            } else {
+                ChangeControlEnable(true);
+                mEditArticleButton.setVisibility(View.VISIBLE);
+
+            }
+            fillCategories();
+            showImage();
+        }
+    }
 
     @Override
     public void onClick(View v) {
@@ -188,7 +215,7 @@ public class FragmentArticleDetail extends BaseFragment implements FragmentArtic
         mDescEditText.setEnabled(isEnabled);
         mGroupSpinner.setEnabled(isEnabled);
         mPublishSwitch.setEnabled(isEnabled);
-        mArticleImageView.setEnabled(isEnabled);
+        mAddImageFloatingActionButton.setEnabled(isEnabled);
         if (isEnabled) {
             changeActiveButtons(true,
                     getResources().getColor(R.color.primary),
