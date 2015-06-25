@@ -20,6 +20,7 @@ import com.vk.fesswod.articleView.api.response.DataResponse;
 import com.vk.fesswod.articleView.api.response.ResponseArticleWrapper;
 import com.vk.fesswod.articleView.api.response.ResponseArticlesWrapper;
 import com.vk.fesswod.articleView.api.response.ResponseCategoriesWrapper;
+import com.vk.fesswod.articleView.data.Article;
 
 /**
  * Created by sergeyb on 16.06.15.
@@ -29,10 +30,11 @@ public abstract class BaseFragment extends Fragment {
 
     private static final String DEBUG_TAG = BaseFragment.class.getSimpleName();
 
-    private static final int GET_ARTICLES = 0;
-    private static final int ADD_ARTICLES = 1;
-    private static final int EDIT_ARTICLES = 2;
-    private static final int DELETE_ARTICLES = 3;
+    public static final int GET_ARTICLES = 0;
+    public static final int ADD_ARTICLES = 1;
+    public static final int EDIT_ARTICLES = 2;
+    public static final int DELETE_ARTICLES = 3;
+    public static final int GET_CATEGORIES = 4;
 
 
     protected abstract void showSnackbar(int stringResource, int scnakbarActionString, View.OnClickListener listener);
@@ -45,7 +47,7 @@ public abstract class BaseFragment extends Fragment {
     }
 
     public void sendGetArticlesRequest(final HttpResponseListener responseListener
-            , final HttpResponseErrorListener errorListener, int operationID){
+            , final HttpResponseErrorListener errorListener, final int operationID){
         ApiServiceHelper.getInstance().getArticles(new DataRequest(), new ResultReceiver(new Handler()) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
@@ -54,12 +56,12 @@ public abstract class BaseFragment extends Fragment {
         });
     }
 
-    public void sendAddArticleRequest(String body, String imagePath
+    public void sendAddArticleRequest(Article article
             , final HttpResponseListener responseListener
             , final HttpResponseErrorListener errorListener
-            , int operationID){
+            , final int operationID){
 
-        ApiServiceHelper.getInstance().addArticle(new DataRequest(body, imagePath)
+        ApiServiceHelper.getInstance().addArticle(new DataRequest(article)
                 , new ResultReceiver(new Handler()) {
 
             @Override
@@ -70,12 +72,11 @@ public abstract class BaseFragment extends Fragment {
     }
 
 
-    public void sendEditArticleRequest(long id, String body, String imagePath
+    public void sendEditArticleRequest(Article article
             , final HttpResponseListener responseListener
             , final HttpResponseErrorListener errorListener
-            , int operationID){
-        ApiServiceHelper.getInstance().editArticle(new DataRequest(id
-                , body, imagePath), new ResultReceiver(new Handler()) {
+            , final int operationID){
+        ApiServiceHelper.getInstance().editArticle(new DataRequest(article), new ResultReceiver(new Handler()) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 handleReceivedDataResult(resultData, errorListener, responseListener, operationID);
@@ -86,7 +87,7 @@ public abstract class BaseFragment extends Fragment {
     public void sendDeleteArticleRequest(long id
             , final HttpResponseListener responseListener
             , final HttpResponseErrorListener errorListener
-            , int operationID){
+            , final int operationID){
 
         ApiServiceHelper.getInstance().deleteArticle(new DataRequest(id), new ResultReceiver(new Handler()) {
             @Override
@@ -97,12 +98,13 @@ public abstract class BaseFragment extends Fragment {
     }
 
     public void sendGetCategoriesRequest(final HttpResponseListener responseListener
-            , final HttpResponseErrorListener errorListener){
+                                       , final HttpResponseErrorListener errorListener
+                                       , final int operationID){
 
         ApiServiceHelper.getInstance().getCategories(new DataRequest(), new ResultReceiver(new Handler()) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
-                handleReceivedResult(resultData, errorListener, responseListener, -1);
+                handleReceivedResult(resultData, errorListener, responseListener, operationID);
             }
         });
     }

@@ -23,6 +23,7 @@
             android:authorities="com.app.content_provider"
             android:name="com.vk.fesswod.articleView.data.AppContentProvider"
             android:exported="false"/>
-    </application>
 
+        <service android:name=".api.ApiService"/>
+    </application>
 </manifest>

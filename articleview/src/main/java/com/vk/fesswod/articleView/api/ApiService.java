@@ -18,7 +18,8 @@ public class ApiService extends IntentService {
     public static final String CALLBACK_KEY         = "CALLBACK_KEY";
     public static final String ACTION_KEY           = "ACTION_KEY";
     public static final String ERROR_KEY            = "ERROR_KEY";
-    public static final String REQUEST_OBJECT_KEY   = "REQUEST_OBJECT_KEY";
+    public static final String REQUEST_WRAPPER_KEY   = "REQUEST_OBJECT_KEY";
+    public static final String REQUEST_VALUE_KEY   = "REQUEST_VALUE_KEY";
     public static final String RESPONSE_OBJECT_KEY  = "RESPONSE_OBJECT_KEY";
 
     public static final int ACTION_GET_CATEGORIES	= 0;
@@ -83,7 +84,8 @@ public class ApiService extends IntentService {
     }
 
     private Serializable getRequestObject(Intent intent){
-        return intent.getSerializableExtra(REQUEST_OBJECT_KEY);
+        Bundle bundleExtra = intent.getBundleExtra(REQUEST_WRAPPER_KEY);
+        return bundleExtra.getSerializable(REQUEST_VALUE_KEY);
     }
 
     private void sentMessage(int code, Bundle data){

@@ -219,9 +219,12 @@ public class BaseActivity extends FragmentActivity implements ChangeFilterClause
     private CursorLoader createArticleCursorLoader(Bundle args) {
         String[] projection = { COLUMN_ID,
                 ARTICLES_COLUMN_TITLE,
-                ARTICLES_COLUMN_IS_MYOWN
+                ARTICLES_COLUMN_IS_MYOWN,
+                ARTICLES_COLUMN_CREATED_AT
         };
-        String orderBy =COLUMN_ID+","+ARTICLES_COLUMN_TITLE;
+        String orderBy = AppSQLiteOpenHelper.ARTICLES_COLUMN_UPDATED_AT+
+                " DESC ";
+                //+" DESC";
         String selection = null;
         String[] selectionARGS = null;
         if(args != null){
@@ -232,14 +235,15 @@ public class BaseActivity extends FragmentActivity implements ChangeFilterClause
         return new CursorLoader(this,
                 AppContentProvider.CONTENT_URI_ARTICLES, projection, selection, selectionARGS, orderBy);
     }
+
     private CursorLoader createGroupCursorLoader(Bundle args) {
         String[] projection = { COLUMN_ID,
                 GROUPS_COLUMN_TITLE
         };
-        String orderBy =GROUPS_COLUMN_TITLE;
+
 
         return new CursorLoader(this,
-                AppContentProvider.CONTENT_URI_PATH_NOT_EMPTY, projection, null, null, orderBy);
+                AppContentProvider.CONTENT_URI_PATH_NOT_EMPTY, projection, null, null, null);
     }
 
     @Override

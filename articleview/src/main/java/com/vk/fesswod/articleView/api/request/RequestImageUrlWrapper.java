@@ -2,7 +2,9 @@ package com.vk.fesswod.articleView.api.request;
 
 import com.google.gson.annotations.SerializedName;
 
-public class RequestImageUrlWrapper {
+import java.io.Serializable;
+
+public class RequestImageUrlWrapper  implements Serializable{
     @SerializedName("url")
     private String mImageUrl;
 

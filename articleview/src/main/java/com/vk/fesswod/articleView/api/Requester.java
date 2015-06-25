@@ -9,6 +9,7 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vk.fesswod.articleView.AppController;
+import com.vk.fesswod.articleView.api.request.RequestImageUrlWrapper;
 import com.vk.fesswod.articleView.api.response.ResponseArticleWrapper;
 import com.vk.fesswod.articleView.api.response.ResponseArticlesWrapper;
 import com.vk.fesswod.articleView.api.response.ResponseCategoriesWrapper;
@@ -98,7 +99,7 @@ public class Requester {
         RestClient restClient	= new RestClient();
         String url				= putArticleUrl();
         Gson gson				= new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss Z").create();
-        ApiResponse response	= restClient.doPost(url, null, request.getData());
+        ApiResponse response	= restClient.doPost(url, null, gson.toJson(request.getArticle()));
         ResponseArticleWrapper responseWrapper = deserialize(gson, response, ResponseArticleWrapper.class);
 
         if(responseWrapper != null && responseWrapper.getArticle() != null){
@@ -107,9 +108,10 @@ public class Requester {
             AppController.getAppContext().getContentResolver()
                     .insert(AppContentProvider.CONTENT_URI_ARTICLES
                             , responseWrapper.getArticle().buildContentValues());
-
-            if(!TextUtils.isEmpty(request.getAdditionalData())){
-                addPhotoToArticle(id, request.getAdditionalData());
+            RequestImageUrlWrapper photoContainer = request.getArticle().getPhotoContainer();
+            if( photoContainer != null &&
+                    !TextUtils.isEmpty(photoContainer.getImageUrl())){
+                addPhotoToArticle(id, photoContainer.getImageUrl());
             }
             Log.d(DEBUG_TAG, "article successfully sent");
         }
@@ -138,26 +140,29 @@ public class Requester {
 
     public DataResponse editArticle(DataRequest request) {
         long id	= -1;
-        //TODO:start volley
+        Log.d(DEBUG_TAG, "editArticle has started");
+
         RestClient restClient	= new RestClient();
-        String url				= editArticleUrl(request.getId());
+        String url				= editArticleUrl(request.getArticle().getId());
         Gson gson				= new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss Z").create();
 
-        ApiResponse response	= restClient.doPut(url, request.getData());
+        ApiResponse response	= restClient.doPut(url, gson.toJson(request.getArticle()));
         ResponseArticleWrapper responseContainer = deserialize(gson, response, ResponseArticleWrapper.class);
 
         if(responseContainer != null && responseContainer.getArticle() != null){
-            //update in db
+
             id	= responseContainer.getArticle().getId();
-            AppController.getAppContext().getContentResolver()
-                    .update(Uri.withAppendedPath(AppContentProvider.CONTENT_URI_ARTICLES, "" + id)
-                            ,responseContainer.getArticle().buildContentValues()
-                            ,null
-                            ,null);
-            if(!TextUtils.isEmpty(request.getAdditionalData())){
-                addPhotoToArticle(id, request.getAdditionalData());
+            // replace old row in database
+          AppController.getAppContext().getContentResolver()
+                  .update(Uri.withAppendedPath(AppContentProvider.CONTENT_URI_ARTICLES, "" + id),
+                          responseContainer.getArticle().buildContentValues(), null, null);
+
+            RequestImageUrlWrapper photoContainer = request.getArticle().getPhotoContainer();
+            if( photoContainer != null &&
+                    !TextUtils.isEmpty(photoContainer.getImageUrl())){
+                addPhotoToArticle(id, photoContainer.getImageUrl());
             }
-            Log.d(DEBUG_TAG, "article succesful edited");
+            Log.d(DEBUG_TAG, "article has been changed successfully");
         }
 
         return new DataResponse(id);
@@ -167,8 +172,7 @@ public class Requester {
         RestClient restClient				= new RestClient();
         String url							= addImageUrl(id);
         Gson gson							= new Gson();
-        Uri uri								= Uri.parse(imagePath);
-        File file							= new File(Utils.getPath(AppController.getAppContext(), uri));
+        File file							= new File(imagePath);
         String response						= restClient.doMultiPartRequest(url, file, "photo[image]");
         ResponseImageUrlWrapper responseContainer	= deserialize(gson, response, ResponseImageUrlWrapper.class);
 
@@ -178,8 +182,8 @@ public class Requester {
             values.put(AppSQLiteOpenHelper.ARTICLES_COLUMN_IMAGE_URL,responseContainer.getPhoto().getImageUrl());
             AppController.getAppContext().getContentResolver()
                     .update(Uri.withAppendedPath(AppContentProvider.CONTENT_URI_ARTICLES, "" + id),
-                           values, null, null);
-            Log.d(DEBUG_TAG, "photo added succesfuly");
+                            values, null, null);
+            Log.d(DEBUG_TAG, "photo has  ");
         }
     }
 

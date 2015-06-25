@@ -12,6 +12,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -21,7 +22,7 @@ import static com.vk.fesswod.articleView.data.AppSQLiteOpenHelper.*;
 /**
  * Created by sergeyb on 16.06.15.
  */
-public class Article {
+public class Article  implements Serializable{
 
     private long id;
 
@@ -79,12 +80,17 @@ public class Article {
         if (id >= 0) {
             cv.put(COLUMN_ID, id);
         }
-        cv.put(ARTICLES_COLUMN_TITLE, getTitle());
-        cv.put(ARTICLES_COLUMN_DESC, getDesc());
-        cv.put(ARTICLES_COLUMN_IS_PUBLISHED, isPublished() ? 1 : 0);
-        cv.put(ARTICLES_COLUMN_IS_MYOWN, isMyOwn() ?1:0);
-        cv.put(ARTICLES_COLUMN_GROUP_ID, getArticleGroupId());
-        cv.put(ARTICLES_COLUMN_IMAGE_URL, getPhotoContainer().getImageUrl());
+        cv.put(SQL_INSERT_OR_REPLACE,true);
+        cv.put(ARTICLES_COLUMN_TITLE, title);
+        cv.put(ARTICLES_COLUMN_DESC, desc);
+        cv.put(ARTICLES_COLUMN_IS_PUBLISHED, isPublished ? 1 : 0);
+        cv.put(ARTICLES_COLUMN_IS_MYOWN, isMyOwn ?1:0);
+        cv.put(ARTICLES_COLUMN_GROUP_ID, mArticleGroupId);
+        if(getPhotoContainer() != null){
+            cv.put(ARTICLES_COLUMN_IMAGE_URL, getPhotoContainer().getImageUrl());
+        }else {
+            cv.put(ARTICLES_COLUMN_IMAGE_URL, "");
+        }
         cv.put(ARTICLES_COLUMN_UPDATED_AT, getUpdateAtTime().getTime());
         cv.put(ARTICLES_COLUMN_CREATED_AT, getCreateAtTime().getTime());
         return cv;
