@@ -159,7 +159,9 @@ public class Requester {
 
             RequestImageUrlWrapper photoContainer = request.getArticle().getPhotoContainer();
             if( photoContainer != null &&
-                    !TextUtils.isEmpty(photoContainer.getImageUrl())){
+                    !TextUtils.isEmpty(photoContainer.getImageUrl())
+                    && !photoContainer.getImageUrl().contains("http://editors.yozhik.sibext.ru")){
+
                 addPhotoToArticle(id, photoContainer.getImageUrl());
             }
             Log.d(DEBUG_TAG, "article has been changed successfully");

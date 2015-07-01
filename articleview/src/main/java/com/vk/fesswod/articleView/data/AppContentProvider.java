@@ -148,6 +148,17 @@ public class AppContentProvider extends ContentProvider {
         int result = 0;
         int uriId = sURI_MATCHER.match(uri);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        if ( values.containsKey(SQL_INSERT_OR_REPLACE)) {
+            // Clone the values object, so we don't modify the original.
+            // This is not strictly necessary, but depends on your needs
+            values = new ContentValues(values);
+
+            // Remove the key, so we don't pass that on to db.insert() or db.replace()
+            values.remove(SQL_INSERT_OR_REPLACE);
+        }
+
+
         switch (uriId){
 
             case CODE_ARTICLES:

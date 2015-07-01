@@ -301,7 +301,7 @@ public class RestClient {
             try {
                 entity.setCharset(CharsetUtils.get("UTF-8"));
             } catch (Exception e) {
-                e.printStackTrace();
+               Log.e(DEBUG_TAG," error in doMultiPartRequest ",e);
             }
             entity.addPart(fileParameterName, new FileBody(file, ContentType.create("image/jpeg"), file.getName()));
             httpentity = entity.build();
@@ -328,7 +328,7 @@ public class RestClient {
             dos = new DataOutputStream(conn.getOutputStream());
             httpentity.writeTo(dos);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(DEBUG_TAG, " error in doMultiPartRequest ", e);
         }
         finally
         {
